@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>LUVEX Strip Analyzer</title>
+    <style>
+        :root {
+            --luvex-dark-blue: #1b2a49;
+            --luvex-bright-cyan: #6dd5ed;
+            --luvex-white: #ffffff;
+            --luvex-gray-700: #374151;
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, var(--luvex-dark-blue) 0%, #243b73 100%);
+            color: var(--luvex-white);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .logo-img {
+            height: 60px;
+            width: auto;
+        }
+        
+        .logo-text {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--luvex-bright-cyan);
+        }
+        
+        .tagline {
+            color: #ced4da;
+            font-size: 1.1rem;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--luvex-bright-cyan);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            background: rgba(109, 213, 237, 0.1);
+            border-color: #5ac7e0;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 14px 32px;
+            background: var(--luvex-bright-cyan);
+            color: var(--luvex-dark-blue);
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin: 0.5rem;
+        }
+        
+        .btn:hover {
+            background: #5ac7e0;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(109, 213, 237, 0.4);
+            color: var(--luvex-dark-blue);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--luvex-bright-cyan);
+            border: 2px solid var(--luvex-bright-cyan);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(109, 213, 237, 0.1);
+            color: var(--luvex-bright-cyan);
+        }
+        
+        .result-box {
+            background: rgba(109, 213, 237, 0.1);
+            border: 1px solid var(--luvex-bright-cyan);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        input[type="file"] {
+            margin: 1rem 0;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: var(--luvex-white);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <img src="../../assets/images/luvex-logo-transparency.png" alt="LUVEX" class="logo-img">
+                <div class="logo-text">Strip Analyzer</div>
+            </div>
+            <div class="tagline">Professional UV Dosimetry Solutions</div>
+        </div>
+        
+        <div class="card">
+            <h2>🌟 UV-Streifen Analyse</h2>
+            <div class="upload-area">
+                <p>📷 UV-Streifen Bild auswählen</p>
+                <input type="file" id="imageInput" accept="image/*">
+                <br>
+                <button class="btn" onclick="analyzeImage()">
+                    ⚡ Bild analysieren
+                </button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>🔧 System Status</h3>
+            <button class="btn btn-secondary" onclick="testAPI()">
+                🔗 Backend testen
+            </button>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            try {
+                const response = await fetch('http://localhost:8000/health');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = 
+                    '<div class="result-box">✅ LUVEX Backend verbunden: ' + data.status + '</div>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    '<div class="result-box">❌ Backend nicht erreichbar</div>';
+            }
+        }
+
+        function analyzeImage() {
+            const fileInput = document.getElementById('imageInput');
+            if (fileInput.files.length > 0) {
+                const fileName = fileInput.files[0].name;
+                document.getElementById('result').innerHTML = 
+                    '<div class="result-box">' +
+                    '<p>📸 LUVEX Analyse gestartet</p>' +
+                    '<p>📁 Datei: ' + fileName + '</p>' +
+                    '<p>⏳ Dosimetrie-Analyse folgt im nächsten Schritt...</p>' +
+                    '</div>';
+            } else {
+                alert('Bitte wählen Sie zuerst ein Bild aus!');
+            }
+        }
+    </script>
+</body>
+</html>
