@@ -69,11 +69,24 @@
             padding: 2rem;
             text-align: center;
             transition: all 0.3s ease;
+            cursor: pointer;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         
-        .upload-area:hover {
+        .upload-area:hover, .upload-area.drag-over {
             background: rgba(109, 213, 237, 0.1);
             border-color: #5ac7e0;
+            transform: translateY(-2px);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
         }
         
         .btn {
@@ -91,13 +104,21 @@
             transition: all 0.3s ease;
             text-decoration: none;
             margin: 0.5rem;
+            font-size: 1rem;
         }
         
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             background: #5ac7e0;
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(109, 213, 237, 0.4);
             color: var(--luvex-dark-blue);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         
         .btn-secondary {
@@ -117,15 +138,147 @@
             border-radius: 8px;
             padding: 1rem;
             margin-top: 1rem;
+            display: none;
         }
         
         input[type="file"] {
-            margin: 1rem 0;
-            padding: 0.5rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        
+        /* Status Messages */
+        .status {
+            padding: 1rem;
             border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+        }
+        
+        .status.info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid #3b82f6;
+            color: #93c5fd;
+        }
+        
+        .status.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid #22c55e;
+            color: #86efac;
+        }
+        
+        .status.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            border: 3px solid rgba(109, 213, 237, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid var(--luvex-bright-cyan);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Image Preview */
+        #imagePreview {
+            text-align: center;
+            margin: 1rem 0;
+            display: none;
+        }
+        
+        #imagePreview img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Results */
+        #resultsContainer {
+            display: none;
+            margin-top: 2rem;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .result-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .result-card h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--luvex-bright-cyan);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .result-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
             color: var(--luvex-white);
+        }
+        
+        .result-card .recommendation {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #e5e7eb;
+            margin: 0;
+        }
+        
+        /* Exposure Level Colors */
+        .level-low { color: #22c55e; }
+        .level-medium { color: #f59e0b; }
+        .level-high { color: #ef4444; }
+        .level-extreme { color: #dc2626; font-weight: bold; }
+        
+        .processed-image {
+            margin-top: 2rem;
+            text-align: center;
+        }
+        
+        .processed-image h4 {
+            color: var(--luvex-bright-cyan);
+            margin-bottom: 1rem;
+        }
+        
+        .processed-image img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .logo-text {
+                font-size: 2rem;
+            }
+            
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -133,60 +286,301 @@
     <div class="container">
         <div class="header">
             <div class="logo-container">
-                <img src="../../assets/images/luvex-logo-transparency.png" alt="LUVEX" class="logo-img">
-                <div class="logo-text">Strip Analyzer</div>
+                <!-- Logo würde hier eingefügt werden -->
+                <div class="logo-text">LUVEX Strip Analyzer</div>
             </div>
-            <div class="tagline">Professional UV Dosimetry Solutions</div>
+            <p class="tagline">Professionelle UV-Dosimetrie-Analyse</p>
         </div>
-        
+
+        <!-- Upload Section -->
         <div class="card">
-            <h2>🌟 UV-Streifen Analyse</h2>
-            <div class="upload-area">
-                <p>📷 UV-Streifen Bild auswählen</p>
-                <input type="file" id="imageInput" accept="image/*">
-                <br>
-                <button class="btn" onclick="analyzeImage()">
-                    ⚡ Bild analysieren
+            <h2>📸 UV-Strip hochladen</h2>
+            <div id="uploadArea" class="upload-area">
+                <div class="upload-icon">📷</div>
+                <p><strong>Klicken Sie hier oder ziehen Sie ein Bild hierher</strong></p>
+                <p>Unterstützte Formate: JPG, PNG, GIF (max. 10MB)</p>
+            </div>
+            <input type="file" id="fileInput" accept="image/*">
+            
+            <!-- Status Messages -->
+            <div id="statusMessage" class="status"></div>
+            
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading-spinner"></div>
+            
+            <!-- Image Preview -->
+            <div id="imagePreview"></div>
+            
+            <!-- Action Buttons -->
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <button id="analyzeBtn" class="btn" disabled>
+                    🔍 Bild analysieren
                 </button>
             </div>
         </div>
-        
+
+        <!-- Results Section -->
+        <div id="resultsContainer" class="card">
+            <!-- Results will be dynamically inserted here -->
+        </div>
+
+        <!-- Info Section -->
         <div class="card">
-            <h3>🔧 System Status</h3>
-            <button class="btn btn-secondary" onclick="testAPI()">
-                🔗 Backend testen
-            </button>
-            <div id="result"></div>
+            <h3>ℹ️ Über LUVEX Strip Analyzer</h3>
+            <p>
+                Diese Anwendung analysiert UV-Dosimeter-Streifen und bestimmt die empfangene UV-Strahlung. 
+                Die Analyse basiert auf Farbveränderungen des photosensitiven Materials.
+            </p>
+            <h4>Funktionen:</h4>
+            <ul>
+                <li>✅ Automatische Strip-Erkennung</li>
+                <li>✅ Präzise Farbanalyse</li>
+                <li>✅ UV-Dosis-Berechnung</li>
+                <li>✅ Expositionsbewertung</li>
+                <li>✅ Professionelle Empfehlungen</li>
+            </ul>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-secondary">
+                    📋 Kalibrierung
+                </button>
+                <button class="btn btn-secondary">
+                    📊 Verlauf
+                </button>
+            </div>
         </div>
     </div>
 
+    <!-- JavaScript -->
     <script>
-        async function testAPI() {
-            try {
-                const response = await fetch('http://localhost:8000/health');
-                const data = await response.json();
-                document.getElementById('result').innerHTML = 
-                    '<div class="result-box">✅ LUVEX Backend verbunden: ' + data.status + '</div>';
-            } catch (error) {
-                document.getElementById('result').innerHTML = 
-                    '<div class="result-box">❌ Backend nicht erreichbar</div>';
+        // UV Strip Analyzer - Frontend JavaScript für Bildanalyse
+        class UVStripAnalyzer {
+            constructor() {
+                this.apiUrl = 'http://localhost:8000';
+                this.currentImage = null;
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                const uploadArea = document.getElementById('uploadArea');
+                const fileInput = document.getElementById('fileInput');
+                const analyzeBtn = document.getElementById('analyzeBtn');
+
+                // Drag & Drop Events
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('drag-over');
+                });
+
+                uploadArea.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('drag-over');
+                });
+
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('drag-over');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        this.handleFileSelection(files[0]);
+                    }
+                });
+
+                // File Input Change
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        this.handleFileSelection(e.target.files[0]);
+                    }
+                });
+
+                // Click to Upload
+                uploadArea.addEventListener('click', () => {
+                    fileInput.click();
+                });
+
+                // Analyze Button
+                analyzeBtn.addEventListener('click', () => {
+                    this.analyzeImage();
+                });
+            }
+
+            async handleFileSelection(file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    this.showError('Bitte wählen Sie eine gültige Bilddatei aus.');
+                    return;
+                }
+
+                // Validate file size (max 10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    this.showError('Datei ist zu groß. Maximum: 10MB');
+                    return;
+                }
+
+                this.currentImage = file;
+                
+                // Show image preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.showImagePreview(e.target.result);
+                };
+                reader.readAsDataURL(file);
+
+                // Enable analyze button
+                document.getElementById('analyzeBtn').disabled = false;
+                
+                this.showStatus('Bild erfolgreich geladen. Bereit zur Analyse.', 'info');
+            }
+
+            showImagePreview(src) {
+                const previewContainer = document.getElementById('imagePreview');
+                previewContainer.innerHTML = `
+                    <h4>Vorschau:</h4>
+                    <img src="${src}" alt="UV Strip Preview">
+                `;
+                previewContainer.style.display = 'block';
+            }
+
+            async analyzeImage() {
+                if (!this.currentImage) {
+                    this.showError('Bitte wählen Sie zuerst ein Bild aus.');
+                    return;
+                }
+
+                // Show loading state
+                this.setLoading(true);
+                this.showStatus('Analysiere UV-Strip...', 'info');
+
+                try {
+                    // Create form data
+                    const formData = new FormData();
+                    formData.append('file', this.currentImage);
+
+                    // Send to backend
+                    const response = await fetch(`${this.apiUrl}/analyze`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    this.displayResults(result);
+
+                } catch (error) {
+                    console.error('Analyse-Fehler:', error);
+                    this.showError(`Fehler bei der Analyse: ${error.message}`);
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            displayResults(result) {
+                const resultsContainer = document.getElementById('resultsContainer');
+                
+                resultsContainer.innerHTML = `
+                    <h3>📊 Analyseergebnisse</h3>
+                    <div class="result-grid">
+                        <div class="result-card">
+                            <h4>UV-Dosis</h4>
+                            <p class="value">${result.uv_dose || 'N/A'} J/cm²</p>
+                        </div>
+                        <div class="result-card">
+                            <h4>Farbveränderung</h4>
+                            <p class="value">${result.color_change || 'N/A'}%</p>
+                        </div>
+                        <div class="result-card">
+                            <h4>Expositionsstufe</h4>
+                            <p class="value level-${result.exposure_level}">${this.getExposureLabel(result.exposure_level)}</p>
+                        </div>
+                        <div class="result-card">
+                            <h4>Empfehlung</h4>
+                            <p class="recommendation">${result.recommendation || 'Keine Empfehlung verfügbar'}</p>
+                        </div>
+                    </div>
+                    
+                    ${result.processed_image ? `
+                        <div class="processed-image">
+                            <h4>Verarbeitetes Bild</h4>
+                            <img src="data:image/jpeg;base64,${result.processed_image}" alt="Processed UV Strip">
+                        </div>
+                    ` : ''}
+                `;
+
+                resultsContainer.style.display = 'block';
+                this.showStatus('Analyse erfolgreich abgeschlossen!', 'success');
+            }
+
+            getExposureLabel(level) {
+                const labels = {
+                    'low': 'Niedrig',
+                    'medium': 'Mittel', 
+                    'high': 'Hoch',
+                    'extreme': 'Extrem'
+                };
+                return labels[level] || 'Unbekannt';
+            }
+
+            setLoading(isLoading) {
+                const analyzeBtn = document.getElementById('analyzeBtn');
+                const spinner = document.getElementById('loadingSpinner');
+                
+                analyzeBtn.disabled = isLoading;
+                analyzeBtn.textContent = isLoading ? '⏳ Analysiere...' : '🔍 Bild analysieren';
+                
+                if (spinner) {
+                    spinner.style.display = isLoading ? 'block' : 'none';
+                }
+            }
+
+            showStatus(message, type = 'info') {
+                const statusEl = document.getElementById('statusMessage');
+                if (statusEl) {
+                    statusEl.textContent = message;
+                    statusEl.className = `status ${type}`;
+                    statusEl.style.display = 'block';
+                    
+                    // Auto-hide after 5 seconds for success messages
+                    if (type === 'success') {
+                        setTimeout(() => {
+                            statusEl.style.display = 'none';
+                        }, 5000);
+                    }
+                }
+            }
+
+            showError(message) {
+                this.showStatus(message, 'error');
+            }
+
+            // Health check for backend connection
+            async checkBackendHealth() {
+                try {
+                    const response = await fetch(`${this.apiUrl}/health`);
+                    const data = await response.json();
+                    console.log('Backend Status:', data);
+                    this.showStatus('Backend-Verbindung erfolgreich!', 'success');
+                    return true;
+                } catch (error) {
+                    console.warn('Backend nicht erreichbar:', error);
+                    this.showError('Verbindung zum Server fehlgeschlagen. Bitte starten Sie das Backend.');
+                    return false;
+                }
             }
         }
 
-        function analyzeImage() {
-            const fileInput = document.getElementById('imageInput');
-            if (fileInput.files.length > 0) {
-                const fileName = fileInput.files[0].name;
-                document.getElementById('result').innerHTML = 
-                    '<div class="result-box">' +
-                    '<p>📸 LUVEX Analyse gestartet</p>' +
-                    '<p>📁 Datei: ' + fileName + '</p>' +
-                    '<p>⏳ Dosimetrie-Analyse folgt im nächsten Schritt...</p>' +
-                    '</div>';
-            } else {
-                alert('Bitte wählen Sie zuerst ein Bild aus!');
-            }
-        }
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const analyzer = new UVStripAnalyzer();
+            
+            // Check backend health on startup
+            setTimeout(() => analyzer.checkBackendHealth(), 1000);
+            
+            // Make analyzer globally available for debugging
+            window.uvAnalyzer = analyzer;
+        });
     </script>
 </body>
 </html>

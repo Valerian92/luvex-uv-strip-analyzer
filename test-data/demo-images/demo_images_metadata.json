@@ -1,0 +1,97 @@
+{
+  "uv-strip-0J.jpg": {
+    "dose_jcm2": 0,
+    "label": "Unbelichtet",
+    "expected_rgb": [
+      245,
+      240,
+      235
+    ],
+    "strip_dimensions": [
+      300,
+      100
+    ],
+    "strip_position": [
+      50,
+      50,
+      350,
+      150
+    ]
+  },
+  "uv-strip-50J.jpg": {
+    "dose_jcm2": 50,
+    "label": "Niedrige Exposition",
+    "expected_rgb": [
+      220,
+      200,
+      180
+    ],
+    "strip_dimensions": [
+      300,
+      100
+    ],
+    "strip_position": [
+      50,
+      50,
+      350,
+      150
+    ]
+  },
+  "uv-strip-150J.jpg": {
+    "dose_jcm2": 150,
+    "label": "Mittlere Exposition",
+    "expected_rgb": [
+      180,
+      150,
+      120
+    ],
+    "strip_dimensions": [
+      300,
+      100
+    ],
+    "strip_position": [
+      50,
+      50,
+      350,
+      150
+    ]
+  },
+  "uv-strip-300J.jpg": {
+    "dose_jcm2": 300,
+    "label": "Hohe Exposition",
+    "expected_rgb": [
+      140,
+      100,
+      80
+    ],
+    "strip_dimensions": [
+      300,
+      100
+    ],
+    "strip_position": [
+      50,
+      50,
+      350,
+      150
+    ]
+  },
+  "uv-strip-500J.jpg": {
+    "dose_jcm2": 500,
+    "label": "Extreme Exposition",
+    "expected_rgb": [
+      100,
+      60,
+      40
+    ],
+    "strip_dimensions": [
+      300,
+      100
+    ],
+    "strip_position": [
+      50,
+      50,
+      350,
+      150
+    ]
+  }
+}

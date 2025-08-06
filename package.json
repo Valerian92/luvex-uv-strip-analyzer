@@ -1,13 +1,16 @@
-﻿{
+{
   "name": "uv-strip-analyzer",
   "version": "1.0.0",
   "description": "Professional UV dosimetry app",
   "main": "src/electron/main.js",
   "scripts": {
     "start": "electron .",
-    "setup": "npm install"
+    "backend": "cd backend/api && python main.py",
+    "dev": "concurrently \"npm run backend\" \"npm run start\"",
+    "setup": "npm install && pip install -r requirements.txt"
   },
   "devDependencies": {
+    "concurrently": "^9.2.0",
     "electron": "^27.0.0"
   }
 }
