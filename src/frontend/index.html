@@ -1,33 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-    <title>LUVEX UV Strip Analyzer</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUVEX UV Strip Analyzer</title>
     <link rel="stylesheet" href="assets/css/luvex-app-design-system.css">
+    <!-- Preconnect to Google Fonts if used in CSS -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
     <!-- Header with LUVEX Branding -->
     <header class="header">
         <div class="header-content">
             <div class="logo-section">
-                <!-- LUVEX Logo -->
-                <img src="assets/images/luvex-logo-transparency.png" 
-                     alt="LUVEX Logo" 
-                     class="luvex-logo"
-                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                
-                <!-- Fallback Text Logo -->
-                <div class="luvex-logo" style="display: none; font-size: 2rem; font-weight: bold; color: var(--luvex-bright-cyan);">
-                    LUVEX
-                </div>
+                <img src="assets/images/luvex-logo-transparency.png" alt="LUVEX Logo" class="luvex-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="luvex-logo" style="display: none; font-size: 2rem; font-weight: bold; color: var(--luvex-bright-cyan);">LUVEX</div>
             </div>
-            
             <div class="brand-text">
-                <div class="brand-title">UV Strip Analyzer</div>
-                <div class="brand-subtitle">Professional UV Dosimetry</div>
+                <h1 class="brand-title">UV Strip Analyzer</h1>
+                <p class="brand-subtitle">Professional UV Dosimetry</p>
             </div>
-            
             <div class="status-indicators">
                 <div class="status-dot"></div>
                 <span class="status-text">System Ready</span>
@@ -37,38 +29,29 @@
 
     <!-- Main Container -->
     <div class="main-container">
-        <!-- Left Column: Analysis Workflow -->
-        <div class="left-column">
+        <!-- Main content column for analysis workflow -->
+        <main class="left-column">
             <!-- Analysis Mode Selection -->
-            <div class="card">
-                <h2 class="card__title">
-                    Analyse-Modus
-                </h2>
-                
+            <section class="card" aria-labelledby="mode-title">
+                <h2 id="mode-title" class="card__title">Analyse-Modus</h2>
                 <div class="mode-selection">
-                    <div class="mode-toggle">
-                        <button id="modeWithReference" class="mode-toggle-btn active">
-                            Referenz im Bild
-                        </button>
-                        <button id="modeSavedReference" class="mode-toggle-btn">
-                            Gespeicherte Referenz
-                        </button>
+                    <div class="mode-toggle" role="radiogroup" aria-label="Analyse-Modus Auswahl">
+                        <button id="modeWithReference" class="mode-toggle-btn active" role="radio" aria-checked="true">Referenz im Bild</button>
+                        <button id="modeSavedReference" class="mode-toggle-btn" role="radio" aria-checked="false">Gespeicherte Referenz</button>
                     </div>
                     <div class="mode-description">
                         <span id="modeDescription">Strip und Referenzskala nebeneinander fotografieren (empfohlen)</span>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Upload Section -->
-            <div class="card">
-                <h2 class="card__title">
-                    UV-Strip Analyse
-                </h2>
+            <!-- Upload and Analysis Section -->
+            <section class="card" aria-labelledby="analysis-title">
+                <h2 id="analysis-title" class="card__title">UV-Strip Analyse</h2>
                 
                 <!-- Upload Container - Mode 1: Single Image -->
                 <div id="uploadMode1" class="upload-container">
-                    <div id="uploadAreaCombined" class="upload-area">
+                    <div id="uploadAreaCombined" class="upload-area" role="button" tabindex="0" aria-label="Bild von Strip und Referenz hochladen">
                         <div class="upload-text">Strip + Referenz hochladen</div>
                         <div class="upload-subtext">Beide nebeneinander im gleichen Bild</div>
                     </div>
@@ -76,7 +59,7 @@
 
                 <!-- Upload Container - Mode 2: Strip + Reference Selection -->
                 <div id="uploadMode2" class="upload-container" style="display: none;">
-                    <div id="uploadAreaStrip" class="upload-area">
+                    <div id="uploadAreaStrip" class="upload-area" role="button" tabindex="0" aria-label="Bild von UV-Strip hochladen">
                         <div class="upload-text">UV-Strip hochladen</div>
                         <div class="upload-subtext">JPG, PNG, GIF (max. 10MB)</div>
                     </div>
@@ -84,149 +67,89 @@
 
                 <!-- Reference Selector for Mode 2 -->
                 <div id="referenceSelector" class="reference-selector">
-                    <label for="referenceDropdown" style="display: block; margin-bottom: 0.5rem; color: var(--text-primary); font-weight: var(--font-weight-medium);">
-                        Referenzskala auswählen:
-                    </label>
-                    <select id="referenceDropdown" class="reference-dropdown">
+                    <label for="referenceDropdown" style="display: block; margin-bottom: 0.5rem; color: var(--text-primary); font-weight: var(--font-weight-medium);">Referenzskala auswählen:</label>
+                    <select id="referenceDropdown" class="reference-dropdown" aria-label="Referenzskala Auswahl">
                         <option value="">-- Referenz auswählen --</option>
                         <option value="standard">Standard UV-Strip (0-500 J/cm²)</option>
                         <option value="uvc">UVC-Strip (0-100 J/cm²)</option>
                         <option value="uva">UVA-Strip (0-1000 J/cm²)</option>
                     </select>
-                    <div style="margin-top: 0.5rem; font-size: var(--text-sm); color: var(--text-secondary);">
-                        Wählen Sie die passende Referenzskala für Ihren Strip-Typ
-                    </div>
                 </div>
                 
-                <input type="file" id="fileInputCombined" accept="image/*">
-                <input type="file" id="fileInputStrip" accept="image/*">
+                <input type="file" id="fileInputCombined" accept="image/*" aria-hidden="true">
+                <input type="file" id="fileInputStrip" accept="image/*" aria-hidden="true">
                 
-                <div id="statusMessage" class="status-message"></div>
-                <div id="loadingSpinner" class="loading-spinner"></div>
+                <div id="statusMessage" class="status-message" role="alert"></div>
+                <div id="loadingSpinner" class="loading-spinner" role="status" aria-label="Analyse wird durchgeführt"></div>
                 
-                <!-- Image Preview -->
-                <div id="imagePreview" class="image-preview"></div>
+                <div id="imagePreview" class="image-preview" aria-live="polite"></div>
                 
-                <!-- Action Buttons -->
                 <div style="text-align: center; margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center;">
-                    <button id="analyzeBtn" class="btn luvex-cta-primary" disabled>
-                        Analyse starten
-                    </button>
-                    <button id="resetBtn" class="btn luvex-cta-secondary">
-                        Reset
-                    </button>
+                    <button id="analyzeBtn" class="btn luvex-cta-primary" disabled>Analyse starten</button>
+                    <button id="resetBtn" class="btn luvex-cta-secondary">Reset</button>
                 </div>
-            </div>
+            </section>
 
             <!-- Results Section -->
-            <div id="resultsContainer" class="card results-container">
-                <h3 class="card__title">
-                    Analyseergebnisse
-                </h3>
+            <section id="resultsContainer" class="card results-container" aria-live="polite">
+                <h3 class="card__title">Analyseergebnisse</h3>
                 <div id="resultsContent"></div>
-            </div>
-        </div>
+            </section>
+        </main>
 
-        <!-- Right Column: Controls & Info -->
-        <div class="right-column">
-            <!-- Live Analysis Dashboard -->
-            <div class="card">
-                <h3 class="card__title">
-                    Dashboard
-                </h3>
-                
+        <!-- Sidebar for controls and info -->
+        <aside class="right-column">
+            <section class="card" aria-labelledby="dashboard-title">
+                <h3 id="dashboard-title" class="card__title">Dashboard</h3>
                 <div class="dashboard-panel">
-                    <div class="panel-header">
-                        Aktuelle Messung
-                    </div>
-                    <div class="metric-item">
-                        <span class="metric-label">Modus:</span>
-                        <span class="metric-value" id="currentMode">Referenz im Bild</span>
-                    </div>
-                    <div class="metric-item">
-                        <span class="metric-label">Verarbeitungszeit:</span>
-                        <span class="metric-value" id="processingTime">--</span>
-                    </div>
-                    <div class="metric-item">
-                        <span class="metric-label">Konfidenz:</span>
-                        <span class="metric-value" id="confidenceLevel">--</span>
-                    </div>
+                    <div class="panel-header">Aktuelle Messung</div>
+                    <div class="metric-item"><span class="metric-label">Modus:</span><span class="metric-value" id="currentMode">Referenz im Bild</span></div>
+                    <div class="metric-item"><span class="metric-label">Verarbeitungszeit:</span><span class="metric-value" id="processingTime">--</span></div>
+                    <div class="metric-item"><span class="metric-label">Konfidenz:</span><span class="metric-value" id="confidenceLevel">--</span></div>
                 </div>
-
                 <div class="dashboard-panel">
-                    <div class="panel-header">
-                        System Status
-                    </div>
-                    <div class="metric-item">
-                        <span class="metric-label">Backend:</span>
-                        <span class="metric-value" style="color: #10b981;" id="backendStatus">Online</span>
-                    </div>
-                    <div class="metric-item">
-                        <span class="metric-label">Letzte Analyse:</span>
-                        <span class="metric-value" id="lastAnalysis">Nie</span>
-                    </div>
+                    <div class="panel-header">System Status</div>
+                    <div class="metric-item"><span class="metric-label">Backend:</span><span class="metric-value" style="color: #10b981;" id="backendStatus">Online</span></div>
+                    <div class="metric-item"><span class="metric-label">Letzte Analyse:</span><span class="metric-value" id="lastAnalysis">Nie</span></div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Reference Library -->
-            <div class="card">
-                <h3 class="card__title">
-                    Referenzbibliothek
-                </h3>
-                
-                <div id="referenceList" class="dashboard-panel">
-                    <!-- Dynamic list loaded by JS -->
-                </div>
-
+            <section class="card" aria-labelledby="ref-library-title">
+                <h3 id="ref-library-title" class="card__title">Referenzbibliothek</h3>
+                <div id="referenceList" class="dashboard-panel"></div>
                 <div class="quick-actions">
-                    <button id="addReferenceBtn" class="btn luvex-cta-secondary">
-                        Referenz hinzufügen
-                    </button>
-                    <button id="manageLibraryBtn" class="btn luvex-cta-secondary" disabled>
-                        Bibliothek verwalten
-                    </button>
+                    <button id="addReferenceBtn" class="btn luvex-cta-secondary">Referenz hinzufügen</button>
+                    <button id="manageLibraryBtn" class="btn luvex-cta-secondary" disabled>Bibliothek verwalten</button>
                 </div>
-            </div>
+            </section>
 
-            <!-- Quick Actions -->
-            <div class="card">
-                <h3 class="card__title">
-                    Aktionen
-                </h3>
+            <section class="card" aria-labelledby="actions-title">
+                <h3 id="actions-title" class="card__title">Aktionen</h3>
                 <div class="quick-actions">
-                    <button id="showAllMeasurementsBtn" class="btn luvex-cta-secondary">
-                        Alle Messungen
-                    </button>
-                    <button class="btn luvex-cta-secondary">
-                        Report exportieren
-                    </button>
-                    <button id="settingsBtn" class="btn luvex-cta-secondary">
-                        Einstellungen
-                    </button>
+                    <button id="showAllMeasurementsBtn" class="btn luvex-cta-secondary">Alle Messungen</button>
+                    <button class="btn luvex-cta-secondary">Report exportieren</button>
+                    <button id="settingsBtn" class="btn luvex-cta-secondary">Einstellungen</button>
                 </div>
+            </section>
+        </aside>
+    </div>
+
+    <!-- Modals -->
+    <div id="measurementsModal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="measurementsModalTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="measurementsModalTitle">Alle Messungen</h2>
+                <button id="closeMeasurementsModalBtn" class="modal-close-btn" aria-label="Schließen">&times;</button>
             </div>
+            <div id="measurementsList" class="modal-body"></div>
         </div>
     </div>
 
-    <!-- Measurements Modal -->
-    <div id="measurementsModal" class="modal-overlay" style="display: none;">
+    <div id="addReferenceModal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="addReferenceModalTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Alle Messungen</h2>
-                <button id="closeMeasurementsModalBtn" class="modal-close-btn">&times;</button>
-            </div>
-            <div id="measurementsList" class="modal-body">
-                <!-- Measurement items will be injected here by JavaScript -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Reference Modal -->
-    <div id="addReferenceModal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Neue Referenz hinzufügen</h2>
-                <button id="closeAddReferenceModalBtn" class="modal-close-btn">&times;</button>
+                <h2 id="addReferenceModalTitle">Neue Referenz hinzufügen</h2>
+                <button id="closeAddReferenceModalBtn" class="modal-close-btn" aria-label="Schließen">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="save-form">
@@ -236,62 +159,53 @@
                     <label for="newReferenceRange">Messbereich</label>
                     <input type="text" id="newReferenceRange" placeholder="z.B. 0-1000 J/cm²">
 
-                    <label>Referenzbild</label>
-                    <div id="uploadAreaReference" class="upload-area modal-upload-area">
+                    <label for="fileInputReference">Referenzbild</label>
+                    <div id="uploadAreaReference" class="upload-area modal-upload-area" role="button" tabindex="0" aria-label="Referenzbild hochladen">
                         <div class="upload-text">Bild hochladen</div>
                         <div class="upload-subtext">JPG, PNG (max. 2MB)</div>
                     </div>
-                    <input type="file" id="fileInputReference" accept="image/*" style="display: none;">
+                    <input type="file" id="fileInputReference" accept="image/*" style="display: none;" aria-hidden="true">
                     <div id="referenceImagePreview" class="image-preview"></div>
 
                     <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                        <button id="saveReferenceBtn" class="btn luvex-cta-primary" style="flex: 1;">
-                            Speichern
-                        </button>
-                        <button id="cancelReferenceBtn" class="btn luvex-cta-secondary" style="flex: 1;">
-                            Abbrechen
-                        </button>
+                        <button id="saveReferenceBtn" class="btn luvex-cta-primary" style="flex: 1;">Speichern</button>
+                        <button id="cancelReferenceBtn" class="btn luvex-cta-secondary" style="flex: 1;">Abbrechen</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Manage Library Modal -->
-    <div id="manageLibraryModal" class="modal-overlay" style="display: none;">
+    <div id="manageLibraryModal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="manageLibraryModalTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Bibliothek verwalten</h2>
-                <button id="closeManageLibraryModalBtn" class="modal-close-btn">&times;</button>
+                <h2 id="manageLibraryModalTitle">Bibliothek verwalten</h2>
+                <button id="closeManageLibraryModalBtn" class="modal-close-btn" aria-label="Schließen">&times;</button>
             </div>
-            <div id="manageLibraryList" class="modal-body">
-                <!-- Management list will be injected here by JavaScript -->
-            </div>
+            <div id="manageLibraryList" class="modal-body"></div>
         </div>
     </div>
 
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="modal-overlay" style="display: none;">
+    <div id="settingsModal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Einstellungen</h2>
-                <button id="closeSettingsModalBtn" class="modal-close-btn">&times;</button>
+                <h2 id="settingsModalTitle">Einstellungen</h2>
+                <button id="closeSettingsModalBtn" class="modal-close-btn" aria-label="Schließen">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="settings-section">
-                    <h3>Datenverwaltung</h3>
+                <section class="settings-section" aria-labelledby="data-management-title">
+                    <h3 id="data-management-title">Datenverwaltung</h3>
                     <p>Aktionen zum Zurücksetzen der im Browser gespeicherten Daten.</p>
                     <div class="settings-actions">
                         <button id="deleteAllMeasurementsBtn" class="btn btn-danger">Alle Messungen löschen</button>
                         <button id="deleteAllReferencesBtn" class="btn btn-danger">Alle Referenzen löschen</button>
                     </div>
-                </div>
+                </section>
             </div>
         </div>
     </div>
 
-    <!-- Custom Confirm Modal -->
-    <div id="confirmModal" class="modal-overlay" style="display: none;">
+    <div id="confirmModal" class="modal-overlay" style="display: none;" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
         <div class="modal-content modal-sm">
             <div class="modal-header">
                 <h2 id="confirmTitle">Aktion bestätigen</h2>
@@ -306,8 +220,7 @@
         </div>
     </div>
 
-
-    <!-- JavaScript -->
-    <script src="assets/js/luvex-app-main.js"></script>
+    <!-- The defer attribute ensures the HTML is parsed before the script is executed -->
+    <script src="assets/js/luvex-app-main.js" defer></script>
 </body>
 </html>
