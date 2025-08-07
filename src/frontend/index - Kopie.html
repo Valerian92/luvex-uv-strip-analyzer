@@ -1,0 +1,1157 @@
+.luvex-cta-secondary {
+            background: var(--luvex-dark-blue);
+            color: var(--luvex-white);
+            border: 1px solid var(--luvex-dark-blue);
+        }
+
+        .luvex-cta-secondary:hover {
+            background: var(--luvex-dark-blue-light);
+            border-color: var(--luvex-dark-blue-light);
+            color: var(--luvex-white);
+        }<!DOCTYPE html>
+<html>
+<head>
+    <title>LUVEX UV Strip Analyzer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <style>
+        /*
+        ==============================================================================
+        LUVEX UV STRIP ANALYZER - PROFESSIONAL CORPORATE DESIGN
+        ==============================================================================
+        */
+
+        /* CSS Variables */
+        :root {
+            /* LUVEX Brand Colors - Updated */
+            --luvex-dark-blue: #1b2a49;
+            --luvex-dark-blue-light: #243b73;
+            --luvex-dark-blue-medium: #2d4a8a;
+            --luvex-bright-cyan: #6dd5ed;
+            --luvex-light-cyan: #8ee3f5;
+            --luvex-white: #ffffff;
+            --luvex-gray-50: #f8fafc;
+            --luvex-gray-100: #f1f5f9;
+            --luvex-gray-200: #e2e8f0;
+            --luvex-gray-300: #cbd5e1;
+            --luvex-gray-400: #94a3b8;
+            --luvex-gray-600: #475569;
+            --luvex-gray-700: #334155;
+            --luvex-gray-800: #1e293b;
+            --luvex-gray-900: #0f172a;
+
+            /* Professional Color System */
+            --bg-primary: #ffffff;
+            --bg-secondary: var(--luvex-gray-50);
+            --bg-dark: var(--luvex-dark-blue);
+            --text-primary: var(--luvex-gray-900);
+            --text-secondary: var(--luvex-gray-600);
+            --text-muted: var(--luvex-gray-400);
+            --border-light: var(--luvex-gray-200);
+            --border-medium: var(--luvex-gray-300);
+            --accent-primary: var(--luvex-bright-cyan);
+            --accent-secondary: var(--luvex-dark-blue);
+
+            /* Spacing & Typography */
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 1.5rem;
+            --space-lg: 2rem;
+            --space-xl: 3rem;
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            
+            /* Radius & Effects */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --transition-fast: all 0.15s ease;
+            --transition-normal: all 0.2s ease;
+        }
+
+        /* Reset & Base */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            font-weight: var(--font-weight-normal);
+        }
+
+        /* Header - LUVEX Corporate Style */
+        .header {
+            background: var(--luvex-dark-blue);
+            border-bottom: 1px solid rgba(109, 213, 237, 0.2);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .luvex-logo {
+            width: 280px;
+            max-width: 280px;
+            height: auto;
+            object-fit: contain;
+            transition: var(--transition-normal);
+        }
+        
+        .brand-text {
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+        
+        .brand-title {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--luvex-white);
+            letter-spacing: -0.025em;
+            white-space: nowrap;
+        }
+        
+        .brand-subtitle {
+            font-size: var(--text-lg);
+            color: var(--luvex-bright-cyan);
+            font-weight: var(--font-weight-medium);
+            white-space: nowrap;
+        }
+        
+        .status-indicators {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+        
+        .status-text {
+            font-size: var(--text-sm);
+            color: var(--luvex-white);
+            font-weight: var(--font-weight-medium);
+        }
+
+        /* Layout */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition-normal);
+            margin-bottom: 1.5rem;
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        .card__title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: var(--text-xl);
+            font-weight: var(--font-weight-semibold);
+            color: var(--text-primary);
+        }
+
+        /* Mode Selection */
+        .mode-selection {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .mode-toggle {
+            display: flex;
+            background: var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 0.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .mode-toggle-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            font-size: var(--text-sm);
+        }
+
+        .mode-toggle-btn.active {
+            background: var(--accent-primary);
+            color: var(--accent-secondary);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .mode-description {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        /* Upload Areas */
+        .upload-container {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-medium);
+            border-radius: var(--radius-lg);
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-secondary);
+            flex: 1;
+            transition: var(--transition-normal);
+        }
+        
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: var(--accent-primary);
+            background: rgba(109, 213, 237, 0.05);
+        }
+        
+        .upload-text {
+            font-size: var(--text-base);
+            font-weight: var(--font-weight-medium);
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .upload-subtext {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+        }
+
+        /* Reference Selector */
+        .reference-selector {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .reference-selector.active {
+            display: block;
+        }
+
+        .reference-dropdown {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-sm);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: var(--text-base);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-size: var(--text-base);
+            font-weight: var(--font-weight-medium);
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: var(--transition-normal);
+            text-decoration: none;
+        }
+        
+        .luvex-cta-primary {
+            background: var(--accent-primary);
+            color: var(--accent-secondary);
+        }
+
+        .luvex-cta-primary:hover:not(:disabled) {
+            background: var(--luvex-light-cyan);
+        }
+
+        .luvex-cta-secondary {
+            background: var(--luvex-dark-blue);
+            color: var(--luvex-white);
+            border: 1px solid var(--luvex-dark-blue);
+        }
+
+        .luvex-cta-secondary:hover {
+            background: var(--luvex-dark-blue-light);
+            border-color: var(--luvex-dark-blue-light);
+            color: var(--luvex-white);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Dashboard Panels */
+        .dashboard-panel {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+        }
+
+        .metric-value {
+            color: var(--text-primary);
+            font-weight: var(--font-weight-medium);
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            margin: 1rem 0;
+            display: none;
+            border-left: 4px solid;
+        }
+        
+        .status-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+        
+        .status-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+            color: #047857;
+        }
+        
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #dc2626;
+        }
+
+        /* Results */
+        .results-container {
+            display: none;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .result-card {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+        
+        .result-label {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .result-value {
+            font-size: 2rem;
+            font-weight: var(--font-weight-bold);
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Loading */
+        .loading-spinner {
+            border: 3px solid var(--border-light);
+            border-radius: 50%;
+            border-top: 3px solid var(--accent-primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Image Preview */
+        .image-preview {
+            text-align: center;
+            margin: 1.5rem 0;
+            display: none;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .main-container {
+                padding: 1rem;
+                gap: 1rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .luvex-logo {
+                width: 120px;
+            }
+
+            .upload-container {
+                flex-direction: column;
+            }
+
+            .mode-toggle {
+                flex-direction: column;
+            }
+        }
+
+        /* File input hidden */
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        /* Save Form */
+        .save-results-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-medium);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            margin: 1.5rem 0;
+        }
+
+        .save-form input, .save-form textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-sm);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: var(--text-base);
+            font-family: inherit;
+        }
+
+        .save-form input:focus, .save-form textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 1px var(--accent-primary);
+        }
+
+        .save-form textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* Level Colors */
+        .level-low { color: #10b981 !important; }
+        .level-medium { color: #f59e0b !important; }
+        .level-high { color: #ef4444 !important; }
+        .level-extreme { 
+            color: #dc2626 !important; 
+            font-weight: var(--font-weight-bold) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with LUVEX Branding -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <!-- LUVEX Logo -->
+                <img src="assets/images/luvex-logo-transparency.png" 
+                     alt="LUVEX Logo" 
+                     class="luvex-logo"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                
+                <!-- Fallback Text Logo -->
+                <div class="luvex-logo" style="display: none; font-size: 2rem; font-weight: bold; color: var(--luvex-bright-cyan);">
+                    LUVEX
+                </div>
+                
+                <div class="brand-text">
+                    <div class="brand-title">UV Strip Analyzer</div>
+                    <div class="brand-subtitle">Professional UV Dosimetry</div>
+                </div>
+            </div>
+            
+            <div class="status-indicators">
+                <div class="status-dot"></div>
+                <span class="status-text">System Ready</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Column: Analysis Workflow -->
+        <div class="left-column">
+            <!-- Analysis Mode Selection -->
+            <div class="card">
+                <h2 class="card__title">
+                    Analyse-Modus
+                </h2>
+                
+                <div class="mode-selection">
+                    <div class="mode-toggle">
+                        <button id="modeWithReference" class="mode-toggle-btn active">
+                            Referenz im Bild
+                        </button>
+                        <button id="modeSavedReference" class="mode-toggle-btn">
+                            Gespeicherte Referenz
+                        </button>
+                    </div>
+                    <div class="mode-description">
+                        <span id="modeDescription">Strip und Referenzskala nebeneinander fotografieren (empfohlen)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="card">
+                <h2 class="card__title">
+                    UV-Strip Analyse
+                </h2>
+                
+                <!-- Upload Container - Mode 1: Single Image -->
+                <div id="uploadMode1" class="upload-container">
+                    <div id="uploadAreaCombined" class="upload-area">
+                        <div class="upload-text">Strip + Referenz hochladen</div>
+                        <div class="upload-subtext">Beide nebeneinander im gleichen Bild</div>
+                    </div>
+                </div>
+
+                <!-- Upload Container - Mode 2: Strip + Reference Selection -->
+                <div id="uploadMode2" class="upload-container" style="display: none;">
+                    <div id="uploadAreaStrip" class="upload-area">
+                        <div class="upload-text">UV-Strip hochladen</div>
+                        <div class="upload-subtext">JPG, PNG, GIF (max. 10MB)</div>
+                    </div>
+                </div>
+
+                <!-- Reference Selector for Mode 2 -->
+                <div id="referenceSelector" class="reference-selector">
+                    <label for="referenceDropdown" style="display: block; margin-bottom: 0.5rem; color: var(--text-primary); font-weight: var(--font-weight-medium);">
+                        Referenzskala auswählen:
+                    </label>
+                    <select id="referenceDropdown" class="reference-dropdown">
+                        <option value="">-- Referenz auswählen --</option>
+                        <option value="standard">Standard UV-Strip (0-500 J/cm²)</option>
+                        <option value="uvc">UVC-Strip (0-100 J/cm²)</option>
+                        <option value="uva">UVA-Strip (0-1000 J/cm²)</option>
+                        <option value="custom">Benutzerdefiniert...</option>
+                    </select>
+                    <div style="margin-top: 0.5rem; font-size: var(--text-sm); color: var(--text-secondary);">
+                        Wählen Sie die passende Referenzskala für Ihren Strip-Typ
+                    </div>
+                </div>
+                
+                <input type="file" id="fileInputCombined" accept="image/*">
+                <input type="file" id="fileInputStrip" accept="image/*">
+                
+                <div id="statusMessage" class="status-message"></div>
+                <div id="loadingSpinner" class="loading-spinner"></div>
+                
+                <!-- Image Preview -->
+                <div id="imagePreview" class="image-preview"></div>
+                
+                <!-- Action Buttons -->
+                <div style="text-align: center; margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center;">
+                    <button id="analyzeBtn" class="btn luvex-cta-primary" disabled>
+                        Analyse starten
+                    </button>
+                    <button id="resetBtn" class="btn luvex-cta-secondary">
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsContainer" class="card results-container">
+                <h3 class="card__title">
+                    Analyseergebnisse
+                </h3>
+                <div id="resultsContent"></div>
+            </div>
+        </div>
+
+        <!-- Right Column: Controls & Info -->
+        <div class="right-column">
+            <!-- Live Analysis Dashboard -->
+            <div class="card">
+                <h3 class="card__title">
+                    Dashboard
+                </h3>
+                
+                <div class="dashboard-panel">
+                    <div class="panel-header">
+                        Aktuelle Messung
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Modus:</span>
+                        <span class="metric-value" id="currentMode">Referenz im Bild</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Verarbeitungszeit:</span>
+                        <span class="metric-value" id="processingTime">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Konfidenz:</span>
+                        <span class="metric-value" id="confidenceLevel">--</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-panel">
+                    <div class="panel-header">
+                        System Status
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Backend:</span>
+                        <span class="metric-value" style="color: #10b981;" id="backendStatus">Online</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Letzte Analyse:</span>
+                        <span class="metric-value" id="lastAnalysis">Nie</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reference Library -->
+            <div class="card">
+                <h3 class="card__title">
+                    Referenzbibliothek
+                </h3>
+                
+                <div class="dashboard-panel">
+                    <div class="panel-header">
+                        Verfügbare Referenzen
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Standard UV-Strip:</span>
+                        <span class="metric-value">0-500 J/cm²</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">UVC-Strip:</span>
+                        <span class="metric-value">0-100 J/cm²</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">UVA-Strip:</span>
+                        <span class="metric-value">0-1000 J/cm²</span>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <button class="btn luvex-cta-secondary">
+                        Referenz hinzufügen
+                    </button>
+                    <button class="btn luvex-cta-secondary">
+                        Bibliothek verwalten
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <h3 class="card__title">
+                    Aktionen
+                </h3>
+                <div class="quick-actions">
+                    <button class="btn luvex-cta-secondary" onclick="uvAnalyzer.showAllMeasurements()">
+                        Alle Messungen
+                    </button>
+                    <button class="btn luvex-cta-secondary">
+                        Report exportieren
+                    </button>
+                    <button class="btn luvex-cta-secondary">
+                        Einstellungen
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // UV Strip Analyzer - Professional Version
+        class UVStripAnalyzer {
+            constructor() {
+                this.apiUrl = 'http://localhost:8000';
+                this.currentImage = null;
+                this.currentMode = 'withReference';
+                this.analysisStartTime = null;
+                this.initializeEventListeners();
+                this.checkBackendHealth();
+            }
+
+            initializeEventListeners() {
+                // Mode Toggle
+                document.getElementById('modeWithReference').addEventListener('click', () => {
+                    this.setMode('withReference');
+                });
+                document.getElementById('modeSavedReference').addEventListener('click', () => {
+                    this.setMode('savedReference');
+                });
+
+                // Upload Areas
+                const uploadAreaCombined = document.getElementById('uploadAreaCombined');
+                const uploadAreaStrip = document.getElementById('uploadAreaStrip');
+                const fileInputCombined = document.getElementById('fileInputCombined');
+                const fileInputStrip = document.getElementById('fileInputStrip');
+
+                // Drag & Drop for combined upload
+                this.setupDragDrop(uploadAreaCombined, fileInputCombined);
+                this.setupDragDrop(uploadAreaStrip, fileInputStrip);
+
+                // File Input Events
+                fileInputCombined.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        this.handleFileSelection(e.target.files[0]);
+                    }
+                });
+
+                fileInputStrip.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        this.handleFileSelection(e.target.files[0]);
+                    }
+                });
+
+                // Buttons
+                document.getElementById('analyzeBtn').addEventListener('click', () => {
+                    this.analyzeImage();
+                });
+
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetAnalysis();
+                });
+            }
+
+            setupDragDrop(uploadArea, fileInput) {
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('drag-over');
+                });
+
+                uploadArea.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('drag-over');
+                });
+
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('drag-over');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        this.handleFileSelection(files[0]);
+                    }
+                });
+
+                uploadArea.addEventListener('click', () => {
+                    fileInput.click();
+                });
+            }
+
+            setMode(mode) {
+                this.currentMode = mode;
+                
+                // Update UI
+                document.querySelectorAll('.mode-toggle-btn').forEach(btn => btn.classList.remove('active'));
+                
+                if (mode === 'withReference') {
+                    document.getElementById('modeWithReference').classList.add('active');
+                    document.getElementById('uploadMode1').style.display = 'flex';
+                    document.getElementById('uploadMode2').style.display = 'none';
+                    document.getElementById('referenceSelector').classList.remove('active');
+                    document.getElementById('modeDescription').textContent = 'Strip und Referenzskala nebeneinander fotografieren (empfohlen)';
+                    document.getElementById('currentMode').textContent = 'Referenz im Bild';
+                } else {
+                    document.getElementById('modeSavedReference').classList.add('active');
+                    document.getElementById('uploadMode1').style.display = 'none';
+                    document.getElementById('uploadMode2').style.display = 'flex';
+                    document.getElementById('referenceSelector').classList.add('active');
+                    document.getElementById('modeDescription').textContent = 'UV-Strip fotografieren und gespeicherte Referenz verwenden';
+                    document.getElementById('currentMode').textContent = 'Gespeicherte Referenz';
+                }
+                
+                this.resetAnalysis();
+            }
+
+            async handleFileSelection(file) {
+                if (!file.type.startsWith('image/')) {
+                    this.showStatus('Bitte wählen Sie eine gültige Bilddatei aus.', 'error');
+                    return;
+                }
+
+                if (file.size > 10 * 1024 * 1024) {
+                    this.showStatus('Datei ist zu groß. Maximum: 10MB', 'error');
+                    return;
+                }
+
+                this.currentImage = file;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.showImagePreview(e.target.result, file.name);
+                };
+                reader.readAsDataURL(file);
+
+                document.getElementById('analyzeBtn').disabled = false;
+                this.showStatus(`Bild "${file.name}" erfolgreich geladen.`, 'success');
+            }
+
+            showImagePreview(src, filename) {
+                const previewContainer = document.getElementById('imagePreview');
+                previewContainer.innerHTML = `
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-weight: var(--font-weight-medium);">
+                        Vorschau: ${filename}
+                    </h4>
+                    <img src="${src}" alt="UV Strip Preview" class="preview-image">
+                `;
+                previewContainer.style.display = 'block';
+            }
+
+            async analyzeImage() {
+                if (!this.currentImage) {
+                    this.showStatus('Bitte wählen Sie zuerst ein Bild aus.', 'error');
+                    return;
+                }
+
+                if (this.currentMode === 'savedReference') {
+                    const selectedReference = document.getElementById('referenceDropdown').value;
+                    if (!selectedReference) {
+                        this.showStatus('Bitte wählen Sie eine Referenzskala aus.', 'error');
+                        return;
+                    }
+                }
+
+                this.analysisStartTime = Date.now();
+                this.setLoading(true);
+                this.showStatus('Analysiere UV-Strip...', 'info');
+
+                try {
+                    const formData = new FormData();
+                    formData.append('file', this.currentImage);
+                    formData.append('mode', this.currentMode);
+                    
+                    if (this.currentMode === 'savedReference') {
+                        formData.append('reference', document.getElementById('referenceDropdown').value);
+                    }
+
+                    const response = await fetch(`${this.apiUrl}/analyze`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    this.displayResults(result);
+                    this.updateAnalysisMetrics(result);
+
+                } catch (error) {
+                    console.error('Analyse-Fehler:', error);
+                    this.showStatus(`Fehler bei der Analyse: ${error.message}`, 'error');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            displayResults(result) {
+                const resultsContainer = document.getElementById('resultsContainer');
+                const resultsContent = document.getElementById('resultsContent');
+                
+                resultsContent.innerHTML = `
+                    <div class="results-grid">
+                        <div class="result-card">
+                            <div class="result-label">UV-Dosis</div>
+                            <div class="result-value">${result.uv_dose || 'N/A'}</div>
+                            <div class="result-unit">J/cm²</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-label">Expositionsstufe</div>
+                            <div class="result-value level-${result.exposure_level}">${this.getExposureLabel(result.exposure_level)}</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-label">Konfidenz</div>
+                            <div class="result-value">${result.confidence || 'N/A'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="save-results-panel">
+                        <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-weight: var(--font-weight-semibold);">
+                            Messung speichern
+                        </h4>
+                        <div class="save-form">
+                            <input type="text" id="measurementName" placeholder="Messungsname (optional)">
+                            <textarea id="measurementNotes" placeholder="Notizen (optional)"></textarea>
+                            <div style="display: flex; gap: 1rem;">
+                                <button id="saveResultBtn" class="btn luvex-cta-primary" style="flex: 1;">
+                                    Speichern
+                                </button>
+                                <button id="discardResultBtn" class="btn luvex-cta-secondary" style="flex: 1;">
+                                    Verwerfen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                resultsContainer.style.display = 'block';
+                this.showStatus('Analyse erfolgreich abgeschlossen!', 'success');
+                
+                document.getElementById('saveResultBtn').addEventListener('click', () => this.saveResults(result));
+                document.getElementById('discardResultBtn').addEventListener('click', () => this.discardResults());
+            }
+
+            saveResults(result) {
+                const measurementName = document.getElementById('measurementName').value || 
+                                      `Messung ${new Date().toLocaleString('de-DE')}`;
+                const measurementNotes = document.getElementById('measurementNotes').value || '';
+                
+                const measurement = {
+                    id: Date.now().toString(),
+                    name: measurementName,
+                    notes: measurementNotes,
+                    timestamp: new Date().toISOString(),
+                    filename: this.currentImage.name,
+                    mode: this.currentMode,
+                    results: result
+                };
+
+                const savedMeasurements = JSON.parse(localStorage.getItem('uvMeasurements') || '[]');
+                savedMeasurements.unshift(measurement);
+                
+                if (savedMeasurements.length > 50) {
+                    savedMeasurements.splice(50);
+                }
+                
+                localStorage.setItem('uvMeasurements', JSON.stringify(savedMeasurements));
+                
+                this.showStatus(`Messung "${measurementName}" erfolgreich gespeichert!`, 'success');
+                document.getElementById('lastAnalysis').textContent = new Date().toLocaleString('de-DE');
+            }
+
+            discardResults() {
+                document.getElementById('resultsContainer').style.display = 'none';
+                this.showStatus('Ergebnisse verworfen.', 'info');
+            }
+
+            resetAnalysis() {
+                document.getElementById('imagePreview').style.display = 'none';
+                document.getElementById('resultsContainer').style.display = 'none';
+                document.getElementById('analyzeBtn').disabled = true;
+                this.currentImage = null;
+                this.updateDashboard('processingTime', '--');
+                this.updateDashboard('confidenceLevel', '--');
+                this.showStatus('', '');
+            }
+
+            updateAnalysisMetrics(result) {
+                const processingTime = Date.now() - this.analysisStartTime;
+                this.updateDashboard('processingTime', `${processingTime}ms`);
+                this.updateDashboard('confidenceLevel', result.confidence || '--');
+            }
+
+            updateDashboard(elementId, value) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = value;
+                }
+            }
+
+            getExposureLabel(level) {
+                const labels = {
+                    'low': 'Niedrig',
+                    'medium': 'Mittel', 
+                    'high': 'Hoch',
+                    'extreme': 'Extrem'
+                };
+                return labels[level] || 'Unbekannt';
+            }
+
+            setLoading(isLoading) {
+                const analyzeBtn = document.getElementById('analyzeBtn');
+                const spinner = document.getElementById('loadingSpinner');
+                
+                analyzeBtn.disabled = isLoading;
+                analyzeBtn.textContent = isLoading ? 'Analysiere...' : 'Analyse starten';
+                
+                if (spinner) {
+                    spinner.style.display = isLoading ? 'block' : 'none';
+                }
+            }
+
+            showStatus(message, type = 'info') {
+                const statusEl = document.getElementById('statusMessage');
+                if (statusEl && message) {
+                    statusEl.textContent = message;
+                    statusEl.className = `status-message status-${type}`;
+                    statusEl.style.display = 'block';
+                    
+                    if (type === 'success') {
+                        setTimeout(() => {
+                            statusEl.style.display = 'none';
+                        }, 3000);
+                    }
+                } else if (statusEl) {
+                    statusEl.style.display = 'none';
+                }
+            }
+
+            async checkBackendHealth() {
+                try {
+                    const response = await fetch(`${this.apiUrl}/health`);
+                    const data = await response.json();
+                    document.getElementById('backendStatus').textContent = 'Online';
+                    document.getElementById('backendStatus').style.color = '#10b981';
+                    return true;
+                } catch (error) {
+                    document.getElementById('backendStatus').textContent = 'Offline';
+                    document.getElementById('backendStatus').style.color = '#ef4444';
+                    this.showStatus('Backend nicht erreichbar. Bitte starten Sie den Server.', 'error');
+                    return false;
+                }
+            }
+
+            showAllMeasurements() {
+                // Implementation für Messung-Historie
+                console.log('Show all measurements');
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const analyzer = new UVStripAnalyzer();
+            setTimeout(() => analyzer.checkBackendHealth(), 1000);
+            window.uvAnalyzer = analyzer;
+        });
+    </script>
+</body>
+</html>
