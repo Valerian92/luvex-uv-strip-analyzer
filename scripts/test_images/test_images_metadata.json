@@ -1,0 +1,1023 @@
+{
+  "generated_at": "2025-08-08T01:17:26.281077",
+  "generator_version": "2.0",
+  "description": "Test images for LUVEX UV Strip Analyzer",
+  "modes": {
+    "mode1_combined": "Strip + Reference scale in same image",
+    "mode2_strip_only": "Strip only, requires saved reference",
+    "reference_scales": "Reference scales for calibration"
+  },
+  "images": [
+    {
+      "filename": "reference_standard.jpg",
+      "type": "reference_scale",
+      "strip_type": "standard",
+      "mode": "reference",
+      "path": "reference_scales/reference_standard.jpg"
+    },
+    {
+      "filename": "reference_uvc.jpg",
+      "type": "reference_scale",
+      "strip_type": "uvc",
+      "mode": "reference",
+      "path": "reference_scales/reference_uvc.jpg"
+    },
+    {
+      "filename": "reference_uva.jpg",
+      "type": "reference_scale",
+      "strip_type": "uva",
+      "mode": "reference",
+      "path": "reference_scales/reference_uva.jpg"
+    },
+    {
+      "id": 1,
+      "filename": "combined_standard_000.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_000.0J_01.jpg"
+    },
+    {
+      "id": 2,
+      "filename": "combined_standard_000.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_000.0J_02.jpg"
+    },
+    {
+      "id": 3,
+      "filename": "combined_standard_025.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 25.0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_025.0J_01.jpg"
+    },
+    {
+      "id": 4,
+      "filename": "combined_standard_025.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 25.0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_025.0J_02.jpg"
+    },
+    {
+      "id": 5,
+      "filename": "combined_standard_050.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 50,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_050.0J_01.jpg"
+    },
+    {
+      "id": 6,
+      "filename": "combined_standard_050.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 50,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_050.0J_02.jpg"
+    },
+    {
+      "id": 7,
+      "filename": "combined_standard_100.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 100.0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_100.0J_01.jpg"
+    },
+    {
+      "id": 8,
+      "filename": "combined_standard_100.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 100.0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_100.0J_02.jpg"
+    },
+    {
+      "id": 9,
+      "filename": "combined_standard_150.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 150,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_150.0J_01.jpg"
+    },
+    {
+      "id": 10,
+      "filename": "combined_standard_150.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 150,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_150.0J_02.jpg"
+    },
+    {
+      "id": 11,
+      "filename": "combined_standard_225.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 225.0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_225.0J_01.jpg"
+    },
+    {
+      "id": 12,
+      "filename": "combined_standard_225.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 225.0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_225.0J_02.jpg"
+    },
+    {
+      "id": 13,
+      "filename": "combined_standard_300.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 300,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_300.0J_01.jpg"
+    },
+    {
+      "id": 14,
+      "filename": "combined_standard_300.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 300,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_300.0J_02.jpg"
+    },
+    {
+      "id": 15,
+      "filename": "combined_standard_400.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 400.0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_400.0J_01.jpg"
+    },
+    {
+      "id": 16,
+      "filename": "combined_standard_400.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 400.0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_400.0J_02.jpg"
+    },
+    {
+      "id": 17,
+      "filename": "combined_standard_500.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 500,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_500.0J_01.jpg"
+    },
+    {
+      "id": 18,
+      "filename": "combined_standard_500.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "standard",
+      "dose_jcm2": 500,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_standard_500.0J_02.jpg"
+    },
+    {
+      "id": 19,
+      "filename": "combined_uvc_000.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_000.0J_01.jpg"
+    },
+    {
+      "id": 20,
+      "filename": "combined_uvc_000.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_000.0J_02.jpg"
+    },
+    {
+      "id": 21,
+      "filename": "combined_uvc_010.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 10.0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_010.0J_01.jpg"
+    },
+    {
+      "id": 22,
+      "filename": "combined_uvc_010.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 10.0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_010.0J_02.jpg"
+    },
+    {
+      "id": 23,
+      "filename": "combined_uvc_020.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 20,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_020.0J_01.jpg"
+    },
+    {
+      "id": 24,
+      "filename": "combined_uvc_020.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 20,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_020.0J_02.jpg"
+    },
+    {
+      "id": 25,
+      "filename": "combined_uvc_035.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 35.0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_035.0J_01.jpg"
+    },
+    {
+      "id": 26,
+      "filename": "combined_uvc_035.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 35.0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_035.0J_02.jpg"
+    },
+    {
+      "id": 27,
+      "filename": "combined_uvc_050.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 50,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_050.0J_01.jpg"
+    },
+    {
+      "id": 28,
+      "filename": "combined_uvc_050.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 50,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_050.0J_02.jpg"
+    },
+    {
+      "id": 29,
+      "filename": "combined_uvc_065.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 65.0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_065.0J_01.jpg"
+    },
+    {
+      "id": 30,
+      "filename": "combined_uvc_065.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 65.0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_065.0J_02.jpg"
+    },
+    {
+      "id": 31,
+      "filename": "combined_uvc_080.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 80,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_080.0J_01.jpg"
+    },
+    {
+      "id": 32,
+      "filename": "combined_uvc_080.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 80,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_080.0J_02.jpg"
+    },
+    {
+      "id": 33,
+      "filename": "combined_uvc_090.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 90.0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_090.0J_01.jpg"
+    },
+    {
+      "id": 34,
+      "filename": "combined_uvc_090.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 90.0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_090.0J_02.jpg"
+    },
+    {
+      "id": 35,
+      "filename": "combined_uvc_100.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 100,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_100.0J_01.jpg"
+    },
+    {
+      "id": 36,
+      "filename": "combined_uvc_100.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uvc",
+      "dose_jcm2": 100,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uvc_100.0J_02.jpg"
+    },
+    {
+      "id": 37,
+      "filename": "combined_uva_000.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_000.0J_01.jpg"
+    },
+    {
+      "id": 38,
+      "filename": "combined_uva_000.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_000.0J_02.jpg"
+    },
+    {
+      "id": 39,
+      "filename": "combined_uva_100.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 100.0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_100.0J_01.jpg"
+    },
+    {
+      "id": 40,
+      "filename": "combined_uva_100.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 100.0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_100.0J_02.jpg"
+    },
+    {
+      "id": 41,
+      "filename": "combined_uva_200.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 200,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_200.0J_01.jpg"
+    },
+    {
+      "id": 42,
+      "filename": "combined_uva_200.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 200,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_200.0J_02.jpg"
+    },
+    {
+      "id": 43,
+      "filename": "combined_uva_350.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 350.0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_350.0J_01.jpg"
+    },
+    {
+      "id": 44,
+      "filename": "combined_uva_350.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 350.0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_350.0J_02.jpg"
+    },
+    {
+      "id": 45,
+      "filename": "combined_uva_500.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 500,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_500.0J_01.jpg"
+    },
+    {
+      "id": 46,
+      "filename": "combined_uva_500.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 500,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_500.0J_02.jpg"
+    },
+    {
+      "id": 47,
+      "filename": "combined_uva_625.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 625.0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_625.0J_01.jpg"
+    },
+    {
+      "id": 48,
+      "filename": "combined_uva_625.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 625.0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_625.0J_02.jpg"
+    },
+    {
+      "id": 49,
+      "filename": "combined_uva_750.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 750,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_750.0J_01.jpg"
+    },
+    {
+      "id": 50,
+      "filename": "combined_uva_750.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 750,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_750.0J_02.jpg"
+    },
+    {
+      "id": 51,
+      "filename": "combined_uva_875.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 875.0,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_875.0J_01.jpg"
+    },
+    {
+      "id": 52,
+      "filename": "combined_uva_875.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 875.0,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_875.0J_02.jpg"
+    },
+    {
+      "id": 53,
+      "filename": "combined_uva_1000.0J_01.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 1000,
+      "variant": 1,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_1000.0J_01.jpg"
+    },
+    {
+      "id": 54,
+      "filename": "combined_uva_1000.0J_02.jpg",
+      "type": "combined",
+      "strip_type": "uva",
+      "dose_jcm2": 1000,
+      "variant": 2,
+      "mode": "withReference",
+      "path": "mode1_combined/combined_uva_1000.0J_02.jpg"
+    },
+    {
+      "id": 55,
+      "filename": "strip_standard_000.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 0,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_000.0J_01.jpg"
+    },
+    {
+      "id": 56,
+      "filename": "strip_standard_000.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 0,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_000.0J_02.jpg"
+    },
+    {
+      "id": 57,
+      "filename": "strip_standard_000.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 0,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_000.0J_03.jpg"
+    },
+    {
+      "id": 58,
+      "filename": "strip_standard_050.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 50,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_050.0J_01.jpg"
+    },
+    {
+      "id": 59,
+      "filename": "strip_standard_050.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 50,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_050.0J_02.jpg"
+    },
+    {
+      "id": 60,
+      "filename": "strip_standard_050.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 50,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_050.0J_03.jpg"
+    },
+    {
+      "id": 61,
+      "filename": "strip_standard_150.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 150,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_150.0J_01.jpg"
+    },
+    {
+      "id": 62,
+      "filename": "strip_standard_150.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 150,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_150.0J_02.jpg"
+    },
+    {
+      "id": 63,
+      "filename": "strip_standard_150.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 150,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_150.0J_03.jpg"
+    },
+    {
+      "id": 64,
+      "filename": "strip_standard_300.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 300,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_300.0J_01.jpg"
+    },
+    {
+      "id": 65,
+      "filename": "strip_standard_300.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 300,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_300.0J_02.jpg"
+    },
+    {
+      "id": 66,
+      "filename": "strip_standard_300.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 300,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_300.0J_03.jpg"
+    },
+    {
+      "id": 67,
+      "filename": "strip_standard_500.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 500,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_500.0J_01.jpg"
+    },
+    {
+      "id": 68,
+      "filename": "strip_standard_500.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 500,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_500.0J_02.jpg"
+    },
+    {
+      "id": 69,
+      "filename": "strip_standard_500.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "standard",
+      "dose_jcm2": 500,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_standard_500.0J_03.jpg"
+    },
+    {
+      "id": 70,
+      "filename": "strip_uvc_000.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 0,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_000.0J_01.jpg"
+    },
+    {
+      "id": 71,
+      "filename": "strip_uvc_000.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 0,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_000.0J_02.jpg"
+    },
+    {
+      "id": 72,
+      "filename": "strip_uvc_000.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 0,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_000.0J_03.jpg"
+    },
+    {
+      "id": 73,
+      "filename": "strip_uvc_020.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 20,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_020.0J_01.jpg"
+    },
+    {
+      "id": 74,
+      "filename": "strip_uvc_020.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 20,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_020.0J_02.jpg"
+    },
+    {
+      "id": 75,
+      "filename": "strip_uvc_020.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 20,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_020.0J_03.jpg"
+    },
+    {
+      "id": 76,
+      "filename": "strip_uvc_050.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 50,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_050.0J_01.jpg"
+    },
+    {
+      "id": 77,
+      "filename": "strip_uvc_050.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 50,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_050.0J_02.jpg"
+    },
+    {
+      "id": 78,
+      "filename": "strip_uvc_050.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 50,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_050.0J_03.jpg"
+    },
+    {
+      "id": 79,
+      "filename": "strip_uvc_080.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 80,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_080.0J_01.jpg"
+    },
+    {
+      "id": 80,
+      "filename": "strip_uvc_080.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 80,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_080.0J_02.jpg"
+    },
+    {
+      "id": 81,
+      "filename": "strip_uvc_080.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 80,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_080.0J_03.jpg"
+    },
+    {
+      "id": 82,
+      "filename": "strip_uvc_100.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 100,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_100.0J_01.jpg"
+    },
+    {
+      "id": 83,
+      "filename": "strip_uvc_100.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 100,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_100.0J_02.jpg"
+    },
+    {
+      "id": 84,
+      "filename": "strip_uvc_100.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "uvc",
+      "dose_jcm2": 100,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uvc_100.0J_03.jpg"
+    },
+    {
+      "id": 85,
+      "filename": "strip_uva_000.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 0,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_000.0J_01.jpg"
+    },
+    {
+      "id": 86,
+      "filename": "strip_uva_000.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 0,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_000.0J_02.jpg"
+    },
+    {
+      "id": 87,
+      "filename": "strip_uva_000.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 0,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_000.0J_03.jpg"
+    },
+    {
+      "id": 88,
+      "filename": "strip_uva_200.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 200,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_200.0J_01.jpg"
+    },
+    {
+      "id": 89,
+      "filename": "strip_uva_200.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 200,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_200.0J_02.jpg"
+    },
+    {
+      "id": 90,
+      "filename": "strip_uva_200.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 200,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_200.0J_03.jpg"
+    },
+    {
+      "id": 91,
+      "filename": "strip_uva_500.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 500,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_500.0J_01.jpg"
+    },
+    {
+      "id": 92,
+      "filename": "strip_uva_500.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 500,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_500.0J_02.jpg"
+    },
+    {
+      "id": 93,
+      "filename": "strip_uva_500.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 500,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_500.0J_03.jpg"
+    },
+    {
+      "id": 94,
+      "filename": "strip_uva_750.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 750,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_750.0J_01.jpg"
+    },
+    {
+      "id": 95,
+      "filename": "strip_uva_750.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 750,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_750.0J_02.jpg"
+    },
+    {
+      "id": 96,
+      "filename": "strip_uva_750.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 750,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_750.0J_03.jpg"
+    },
+    {
+      "id": 97,
+      "filename": "strip_uva_1000.0J_01.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 1000,
+      "variant": 1,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_1000.0J_01.jpg"
+    },
+    {
+      "id": 98,
+      "filename": "strip_uva_1000.0J_02.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 1000,
+      "variant": 2,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_1000.0J_02.jpg"
+    },
+    {
+      "id": 99,
+      "filename": "strip_uva_1000.0J_03.jpg",
+      "type": "strip_only",
+      "strip_type": "uva",
+      "dose_jcm2": 1000,
+      "variant": 3,
+      "mode": "savedReference",
+      "path": "mode2_strip_only/strip_uva_1000.0J_03.jpg"
+    }
+  ]
+}

@@ -1,179 +1,410 @@
-// UV Strip Analyzer - Professional Version
+/**
+ * LUVEX UV Strip Analyzer - Professional, Optimized Version
+ *
+ * This class manages the entire frontend application logic for the UV Strip Analyzer.
+ * It handles user interactions, communication with the backend API, state management,
+ * and dynamic DOM updates in an efficient and robust manner.
+ *
+ * @version 2.0.0
+ * @author Gemini
+ */
 class UVStripAnalyzer {
+    /**
+     * Initializes the application.
+     */
     constructor() {
-        this.apiUrl = 'http://localhost:8000';
-        this.currentImage = null;
-        this.currentMode = 'withReference';
-        this.analysisStartTime = null;
-        this.newReferenceImage = null;
+        // --- Configuration ---
+        this.apiUrl = 'http://localhost:8000'; // Backend API URL
+        this.config = {
+            maxFileSizeMB: 10,
+            maxRefFileSizeMB: 2,
+            apiTimeout: 30000, // 30 seconds
+            statusMsgDuration: 4000, // 4 seconds
+            maxMeasurements: 100,
+        };
 
-        this.cacheDOMElements();
-        this.initializeEventListeners();
-        this.checkBackendHealth();
-        this.populateReferences();
+        // --- State ---
+        this.state = {
+            currentImage: null,
+            newReferenceImage: null,
+            currentMode: 'withReference',
+            isAnalyzing: false,
+            analysisStartTime: null,
+        };
+
+        // --- Caches and Timers ---
+        this.domCache = new Map();
+        this.debounceTimers = new Map();
+
+        // --- Initialization ---
+        // Using requestIdleCallback to avoid blocking the main thread during initial load.
+        if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(() => this.init());
+        } else {
+            // Fallback for browsers that don't support it
+            setTimeout(() => this.init(), 100);
+        }
     }
 
+    /**
+     * Core initialization sequence.
+     * Caches DOM elements, sets up event listeners, and loads initial state.
+     */
+    async init() {
+        try {
+            this.cacheDOMElements();
+            this.initializeEventListeners();
+            this.loadAppState(); // Load saved state first
+            await this.checkBackendHealth();
+            this.populateReferences();
+            this.showStatus('Anwendung erfolgreich initialisiert.', 'success');
+        } catch (error) {
+            console.error('Initialization failed:', error);
+            this.showStatus('Fehler beim Initialisieren der Anwendung.', 'error');
+        }
+    }
+
+    //=========================================================================
+    // DOM Caching and Access
+    //=========================================================================
+
+    /**
+     * Caches frequently accessed DOM elements to avoid repeated queries.
+     */
     cacheDOMElements() {
-        // Main UI elements
-        this.referenceDropdown = document.getElementById('referenceDropdown');
-        this.referenceListContainer = document.getElementById('referenceList');
-        this.manageLibraryBtn = document.getElementById('manageLibraryBtn');
-
-        // Modals
-        this.measurementsModal = document.getElementById('measurementsModal');
-        this.addReferenceModal = document.getElementById('addReferenceModal');
-        this.manageLibraryModal = document.getElementById('manageLibraryModal');
-        this.settingsModal = document.getElementById('settingsModal');
-        this.confirmModal = document.getElementById('confirmModal');
-
-        // Modal content areas
-        this.measurementsList = document.getElementById('measurementsList');
-        this.manageLibraryList = document.getElementById('manageLibraryList');
-
-        // Buttons
-        this.showAllMeasurementsBtn = document.getElementById('showAllMeasurementsBtn');
-        this.addReferenceBtn = document.getElementById('addReferenceBtn');
-        this.settingsBtn = document.getElementById('settingsBtn');
-        this.deleteAllMeasurementsBtn = document.getElementById('deleteAllMeasurementsBtn');
-        this.deleteAllReferencesBtn = document.getElementById('deleteAllReferencesBtn');
-        this.confirmOkBtn = document.getElementById('confirmOkBtn');
-        this.confirmCancelBtn = document.getElementById('confirmCancelBtn');
+        const ids = [
+            'modeWithReference', 'modeSavedReference', 'modeDescription', 'currentMode',
+            'uploadMode1', 'uploadMode2', 'uploadAreaCombined', 'uploadAreaStrip', 'uploadAreaReference',
+            'fileInputCombined', 'fileInputStrip', 'fileInputReference',
+            'referenceSelector', 'referenceDropdown', 'referenceList',
+            'imagePreview', 'referenceImagePreview', 'analyzeBtn', 'resetBtn',
+            'statusMessage', 'loadingSpinner',
+            'resultsContainer', 'resultsContent', 'processingTime', 'confidenceLevel',
+            'backendStatus', 'lastAnalysis',
+            'showAllMeasurementsBtn', 'addReferenceBtn', 'manageLibraryBtn', 'settingsBtn',
+            'measurementsModal', 'addReferenceModal', 'manageLibraryModal', 'settingsModal', 'confirmModal',
+            'measurementsList', 'manageLibraryList',
+            'closeMeasurementsModalBtn', 'closeAddReferenceModalBtn', 'closeManageLibraryModalBtn', 'closeSettingsModalBtn',
+            'saveReferenceBtn', 'cancelReferenceBtn', 'newReferenceName', 'newReferenceRange',
+            'deleteAllMeasurementsBtn', 'deleteAllReferencesBtn',
+            'confirmTitle', 'confirmMessage', 'confirmOkBtn', 'confirmCancelBtn'
+        ];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) this.domCache.set(id, el);
+        });
+        this.domCache.set('modeToggleBtns', document.querySelectorAll('.mode-toggle-btn'));
     }
 
+    /**
+     * Retrieves a cached DOM element.
+     * @param {string} id - The ID of the element to retrieve.
+     * @returns {HTMLElement|null} The cached element or null if not found.
+     */
+    get(id) {
+        return this.domCache.get(id);
+    }
+
+    //=========================================================================
+    // Event Listener Setup
+    //=========================================================================
+
+    /**
+     * Centralized method to initialize all event listeners.
+     */
     initializeEventListeners() {
-        // Mode Toggle
-        document.getElementById('modeWithReference').addEventListener('click', () => this.setMode('withReference'));
-        document.getElementById('modeSavedReference').addEventListener('click', () => this.setMode('savedReference'));
+        // --- Main Controls ---
+        this.addClickListener('modeWithReference', () => this.setMode('withReference'));
+        this.addClickListener('modeSavedReference', () => this.setMode('savedReference'));
+        this.addClickListener('analyzeBtn', () => this.analyzeImage());
+        this.addClickListener('resetBtn', () => this.resetAnalysis());
 
-        // Upload Areas
-        this.setupDragDrop(document.getElementById('uploadAreaCombined'), document.getElementById('fileInputCombined'));
-        this.setupDragDrop(document.getElementById('uploadAreaStrip'), document.getElementById('fileInputStrip'));
-        this.setupDragDrop(document.getElementById('uploadAreaReference'), document.getElementById('fileInputReference'));
+        // --- File Uploads (Drag & Drop and Click) ---
+        this.setupEnhancedDragDrop(this.get('uploadAreaCombined'), this.get('fileInputCombined'));
+        this.setupEnhancedDragDrop(this.get('uploadAreaStrip'), this.get('fileInputStrip'));
+        this.setupEnhancedDragDrop(this.get('uploadAreaReference'), this.get('fileInputReference'));
 
-        // File Input Events
-        document.getElementById('fileInputCombined').addEventListener('change', (e) => this.handleFileSelection(e.target.files[0]));
-        document.getElementById('fileInputStrip').addEventListener('change', (e) => this.handleFileSelection(e.target.files[0]));
-        document.getElementById('fileInputReference').addEventListener('change', (e) => this.handleReferenceFileSelection(e.target.files[0]));
+        this.get('fileInputCombined')?.addEventListener('change', e => this.handleFileSelection(e.target.files[0]));
+        this.get('fileInputStrip')?.addEventListener('change', e => this.handleFileSelection(e.target.files[0]));
+        this.get('fileInputReference')?.addEventListener('change', e => this.handleReferenceFileSelection(e.target.files[0]));
 
-        // Main Action Buttons
-        document.getElementById('analyzeBtn').addEventListener('click', () => this.analyzeImage());
-        document.getElementById('resetBtn').addEventListener('click', () => this.resetAnalysis());
+        // --- Modal Management ---
+        this.setupModalListeners();
 
-        // Modal Triggers
-        this.showAllMeasurementsBtn.addEventListener('click', () => this.showAllMeasurements());
-        this.addReferenceBtn.addEventListener('click', () => this.openModal(this.addReferenceModal));
-        this.manageLibraryBtn.addEventListener('click', () => this.showManageLibrary());
-        this.settingsBtn.addEventListener('click', () => this.openModal(this.settingsModal));
-        
-        // Modal Close Buttons
-        document.getElementById('closeMeasurementsModalBtn').addEventListener('click', () => this.closeModal(this.measurementsModal));
-        document.getElementById('closeAddReferenceModalBtn').addEventListener('click', () => this.closeModal(this.addReferenceModal));
-        document.getElementById('closeManageLibraryModalBtn').addEventListener('click', () => this.closeModal(this.manageLibraryModal));
-        document.getElementById('closeSettingsModalBtn').addEventListener('click', () => this.closeModal(this.settingsModal));
-        
-        // Modal specific buttons
-        document.getElementById('saveReferenceBtn').addEventListener('click', () => this.saveNewReference());
-        document.getElementById('cancelReferenceBtn').addEventListener('click', () => this.closeModal(this.addReferenceModal));
-        this.deleteAllMeasurementsBtn.addEventListener('click', () => this.handleDeleteAllMeasurements());
-        this.deleteAllReferencesBtn.addEventListener('click', () => this.handleDeleteAllReferences());
-        this.confirmCancelBtn.addEventListener('click', () => this.closeModal(this.confirmModal));
+        // --- Global Event Listeners ---
+        this.setupGlobalListeners();
+    }
 
+    /**
+     * Sets up listeners for all modals.
+     */
+    setupModalListeners() {
+        // --- Modal Triggers ---
+        this.addClickListener('showAllMeasurementsBtn', () => this.showAllMeasurements());
+        this.addClickListener('addReferenceBtn', () => this.openModal(this.get('addReferenceModal')));
+        this.addClickListener('manageLibraryBtn', () => this.showManageLibrary());
+        this.addClickListener('settingsBtn', () => this.openModal(this.get('settingsModal')));
 
-        // Click outside to close modals
-        [this.measurementsModal, this.addReferenceModal, this.manageLibraryModal, this.settingsModal, this.confirmModal].forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) this.closeModal(modal);
+        // --- Modal Close Buttons ---
+        const closeButtons = new Map([
+            ['closeMeasurementsModalBtn', 'measurementsModal'],
+            ['closeAddReferenceModalBtn', 'addReferenceModal'],
+            ['closeManageLibraryModalBtn', 'manageLibraryModal'],
+            ['closeSettingsModalBtn', 'settingsModal'],
+            ['confirmCancelBtn', 'confirmModal']
+        ]);
+        closeButtons.forEach((modalId, btnId) => {
+            this.addClickListener(btnId, () => this.closeModal(this.get(modalId)));
+        });
+
+        // --- Modal Action Buttons ---
+        this.addClickListener('saveReferenceBtn', () => this.saveNewReference());
+        this.addClickListener('cancelReferenceBtn', () => this.closeModal(this.get('addReferenceModal')));
+        this.addClickListener('deleteAllMeasurementsBtn', () => this.handleDeleteAllMeasurements());
+        this.addClickListener('deleteAllReferencesBtn', () => this.handleDeleteAllReferences());
+
+        // --- Event Delegation for Dynamic Content ---
+        this.get('manageLibraryList')?.addEventListener('click', e => {
+            const deleteBtn = e.target.closest('.btn-delete');
+            if (deleteBtn) this.deleteReference(deleteBtn.dataset.id);
+        });
+
+        // --- Close modal on overlay click ---
+        this.domCache.forEach((el, key) => {
+            if (key.endsWith('Modal')) {
+                el.addEventListener('click', (e) => {
+                    if (e.target === el) this.closeModal(el);
+                });
+            }
+        });
+    }
+
+    /**
+     * Sets up drag and drop functionality for an upload area.
+     * @param {HTMLElement} uploadArea - The drop zone element.
+     * @param {HTMLInputElement} fileInput - The associated file input element.
+     */
+    setupEnhancedDragDrop(uploadArea, fileInput) {
+        if (!uploadArea || !fileInput) return;
+
+        ['dragover', 'dragenter', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, e => {
+                e.preventDefault();
+                e.stopPropagation();
             });
         });
-        
-        // Event delegation for dynamic delete buttons
-        this.manageLibraryList.addEventListener('click', (e) => {
-            if (e.target.closest('.btn-delete')) {
-                const button = e.target.closest('.btn-delete');
-                const referenceId = button.dataset.id;
-                this.deleteReference(referenceId);
-            }
-        });
-    }
 
-    // ... (rest of the methods are the same as before)
-
-    setupDragDrop(uploadArea, fileInput) {
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('drag-over');
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.add('drag-over'));
         });
 
-        uploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('drag-over');
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('drag-over'));
         });
 
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('drag-over');
+        uploadArea.addEventListener('drop', e => {
             const files = e.dataTransfer.files;
             if (files.length > 0) {
-                if (fileInput.id === 'fileInputReference') {
-                    this.handleReferenceFileSelection(files[0]);
-                } else {
-                    this.handleFileSelection(files[0]);
-                }
+                const handler = fileInput.id === 'fileInputReference' ?
+                    this.handleReferenceFileSelection.bind(this) :
+                    this.handleFileSelection.bind(this);
+                handler(files[0]);
             }
         });
 
-        uploadArea.addEventListener('click', () => fileInput.click());
+        this.addClickListener(uploadArea.id, () => fileInput.click());
     }
 
+    /**
+     * Sets up global listeners for keyboard shortcuts and window events.
+     */
+    setupGlobalListeners() {
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                const openModal = document.querySelector('.modal-overlay.visible');
+                if (openModal) this.closeModal(openModal);
+            }
+            if (e.ctrlKey && e.key === 'Enter' && this.state.currentImage && !this.state.isAnalyzing) {
+                this.analyzeImage();
+            }
+        });
+
+        window.addEventListener('beforeunload', e => {
+            if (this.state.isAnalyzing) {
+                e.preventDefault();
+                e.returnValue = 'Eine Analyse läuft noch. Möchten Sie die Seite wirklich verlassen?';
+            }
+        });
+    }
+
+    /**
+     * Helper to add a click listener to a cached element.
+     * @param {string} id - The ID of the element.
+     * @param {Function} callback - The function to execute on click.
+     */
+    addClickListener(id, callback) {
+        this.get(id)?.addEventListener('click', callback);
+    }
+
+    //=========================================================================
+    // State and UI Management
+    //=========================================================================
+
+    /**
+     * Sets the analysis mode and updates the UI accordingly.
+     * @param {'withReference' | 'savedReference'} mode - The new mode.
+     */
     setMode(mode) {
-        this.currentMode = mode;
-        document.querySelectorAll('.mode-toggle-btn').forEach(btn => btn.classList.remove('active'));
-        if (mode === 'withReference') {
-            document.getElementById('modeWithReference').classList.add('active');
-            document.getElementById('uploadMode1').style.display = 'flex';
-            document.getElementById('uploadMode2').style.display = 'none';
-            document.getElementById('referenceSelector').classList.remove('active');
-            document.getElementById('modeDescription').textContent = 'Strip und Referenzskala nebeneinander fotografieren (empfohlen)';
-            document.getElementById('currentMode').textContent = 'Referenz im Bild';
-        } else {
-            document.getElementById('modeSavedReference').classList.add('active');
-            document.getElementById('uploadMode1').style.display = 'none';
-            document.getElementById('uploadMode2').style.display = 'flex';
-            document.getElementById('referenceSelector').classList.add('active');
-            document.getElementById('modeDescription').textContent = 'UV-Strip fotografieren und gespeicherte Referenz verwenden';
-            document.getElementById('currentMode').textContent = 'Gespeicherte Referenz';
-        }
+        if (this.state.currentMode === mode) return;
+        this.state.currentMode = mode;
+
+        const isWithReference = mode === 'withReference';
+        this.get('modeWithReference')?.classList.toggle('active', isWithReference);
+        this.get('modeSavedReference')?.classList.toggle('active', !isWithReference);
+
+        this.get('uploadMode1').style.display = isWithReference ? 'flex' : 'none';
+        this.get('uploadMode2').style.display = isWithReference ? 'none' : 'flex';
+        this.get('referenceSelector')?.classList.toggle('active', !isWithReference);
+
+        this.updateText('modeDescription', isWithReference ?
+            'Strip und Referenzskala nebeneinander fotografieren (empfohlen)' :
+            'UV-Strip fotografieren und gespeicherte Referenz verwenden'
+        );
+        this.updateText('currentMode', isWithReference ? 'Referenz im Bild' : 'Gespeicherte Referenz');
+
         this.resetAnalysis();
+        this.saveAppState();
     }
 
+    /**
+     * Sets the application into a loading state.
+     * @param {boolean} isLoading - True to show loading indicators, false to hide.
+     */
+    setLoading(isLoading) {
+        const analyzeBtn = this.get('analyzeBtn');
+        if (analyzeBtn) {
+            analyzeBtn.disabled = isLoading;
+            analyzeBtn.innerHTML = isLoading ?
+                '<span>⏳</span> Analysiere...' :
+                '<span>🔍</span> Analyse starten';
+        }
+        this.get('loadingSpinner').style.display = isLoading ? 'block' : 'none';
+    }
+
+    /**
+     * Displays a status message to the user.
+     * @param {string} message - The message to display.
+     * @param {'info' | 'success' | 'error'} type - The type of message.
+     */
+    showStatus(message, type = 'info') {
+        const statusEl = this.get('statusMessage');
+        if (!statusEl) return;
+
+        clearTimeout(this.debounceTimers.get('statusTimer'));
+        if (message) {
+            statusEl.textContent = message;
+            statusEl.className = `status-message status-${type}`;
+            statusEl.style.display = 'block';
+            if (type !== 'error') {
+                const timer = setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, this.config.statusMsgDuration);
+                this.debounceTimers.set('statusTimer', timer);
+            }
+        } else {
+            statusEl.style.display = 'none';
+        }
+    }
+
+    /**
+     * Updates a text content of a cached element.
+     * @param {string} id - The ID of the element.
+     * @param {string} text - The new text content.
+     */
+    updateText(id, text) {
+        const el = this.get(id);
+        if (el) el.textContent = text;
+    }
+
+    /**
+     * Resets the analysis view to its initial state.
+     */
+    resetAnalysis() {
+        this.get('imagePreview').style.display = 'none';
+        this.get('resultsContainer').style.display = 'none';
+        this.get('analyzeBtn').disabled = true;
+
+        this.state.currentImage = null;
+        ['fileInputCombined', 'fileInputStrip'].forEach(id => {
+            const input = this.get(id);
+            if (input) input.value = '';
+        });
+
+        this.updateText('processingTime', '--');
+        this.updateText('confidenceLevel', '--');
+        this.showStatus('', 'info');
+    }
+
+    //=========================================================================
+    // File Handling
+    //=========================================================================
+
+    /**
+     * Handles the selection of the main analysis image.
+     * @param {File} file - The selected file.
+     */
     async handleFileSelection(file) {
-        if (!this.validateFile(file, 10)) return;
-        this.currentImage = file;
-        const dataUrl = await this.readFileAsDataURL(file);
-        this.showImagePreview(dataUrl, file.name, document.getElementById('imagePreview'));
-        document.getElementById('analyzeBtn').disabled = false;
-        this.showStatus(`Bild "${file.name}" erfolgreich geladen.`, 'success');
+        if (!this.validateFile(file, this.config.maxFileSizeMB)) return;
+        this.state.currentImage = file;
+        try {
+            const dataUrl = await this.readFileAsDataURL(file);
+            this.showImagePreview(dataUrl, file.name, this.get('imagePreview'));
+            this.get('analyzeBtn').disabled = false;
+            this.showStatus(`Bild "${file.name}" bereit zur Analyse.`, 'success');
+        } catch (error) {
+            this.showStatus(`Fehler beim Lesen der Datei: ${error.message}`, 'error');
+        }
     }
 
+    /**
+     * Handles the selection of a new reference image.
+     * @param {File} file - The selected file.
+     */
     async handleReferenceFileSelection(file) {
-        if (!this.validateFile(file, 2)) return;
-        this.newReferenceImage = file;
-        const dataUrl = await this.readFileAsDataURL(file);
-        this.showImagePreview(dataUrl, file.name, document.getElementById('referenceImagePreview'));
+        if (!this.validateFile(file, this.config.maxRefFileSizeMB)) return;
+        this.state.newReferenceImage = file;
+        try {
+            const dataUrl = await this.readFileAsDataURL(file);
+            this.showImagePreview(dataUrl, file.name, this.get('referenceImagePreview'));
+        } catch (error) {
+            this.showStatus(`Fehler beim Lesen der Referenzdatei: ${error.message}`, 'error');
+        }
     }
 
+    /**
+     * Validates a file based on type and size.
+     * @param {File} file - The file to validate.
+     * @param {number} maxSizeMB - The maximum allowed file size in megabytes.
+     * @returns {boolean} True if the file is valid, false otherwise.
+     */
     validateFile(file, maxSizeMB) {
+        if (!file) return false;
         if (!file.type.startsWith('image/')) {
-            this.showStatus('Bitte wählen Sie eine gültige Bilddatei aus.', 'error');
+            this.showStatus('Bitte eine gültige Bilddatei auswählen.', 'error');
             return false;
         }
         if (file.size > maxSizeMB * 1024 * 1024) {
-            this.showStatus(`Datei ist zu groß. Maximum: ${maxSizeMB}MB`, 'error');
+            this.showStatus(`Datei zu groß. Maximum: ${maxSizeMB}MB`, 'error');
             return false;
         }
         return true;
     }
 
+    /**
+     * Reads a file and returns its content as a Data URL.
+     * @param {File} file - The file to read.
+     * @returns {Promise<string>} A promise that resolves with the Data URL.
+     */
     readFileAsDataURL(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -183,357 +414,502 @@ class UVStripAnalyzer {
         });
     }
 
-
+    /**
+     * Displays an image preview in a specified container.
+     * @param {string} src - The image source (Data URL).
+     * @param {string} filename - The name of the file.
+     * @param {HTMLElement} container - The container element for the preview.
+     */
     showImagePreview(src, filename, container) {
+        if (!container) return;
         container.innerHTML = `
             <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-weight: var(--font-weight-medium);">
-                Vorschau: ${filename}
+                Vorschau: ${this.escapeHtml(filename)}
             </h4>
-            <img src="${src}" alt="Preview" class="preview-image">
-        `;
+            <img src="${src}" alt="Preview of ${this.escapeHtml(filename)}" class="preview-image" loading="lazy">`;
         container.style.display = 'block';
     }
 
+    //=========================================================================
+    // API Communication & Analysis
+    //=========================================================================
+
+    /**
+     * Sends the image to the backend for analysis.
+     */
     async analyzeImage() {
-        if (!this.currentImage) {
-            this.showStatus('Bitte wählen Sie zuerst ein Bild aus.', 'error');
+        if (this.state.isAnalyzing) return;
+        if (!this.state.currentImage) {
+            this.showStatus('Bitte zuerst ein Bild auswählen.', 'error');
             return;
         }
-        if (this.currentMode === 'savedReference' && !this.referenceDropdown.value) {
-            this.showStatus('Bitte wählen Sie eine Referenzskala aus.', 'error');
+        if (this.state.currentMode === 'savedReference' && !this.get('referenceDropdown').value) {
+            this.showStatus('Bitte eine Referenzskala auswählen.', 'error');
             return;
         }
 
-        this.analysisStartTime = Date.now();
+        this.state.isAnalyzing = true;
+        this.state.analysisStartTime = Date.now();
         this.setLoading(true);
         this.showStatus('Analysiere UV-Strip...', 'info');
 
         try {
             const formData = new FormData();
-            formData.append('file', this.currentImage);
-            formData.append('mode', this.currentMode);
-            if (this.currentMode === 'savedReference') {
-                formData.append('reference', this.referenceDropdown.value);
+            formData.append('file', this.state.currentImage);
+            formData.append('mode', this.state.currentMode);
+            if (this.state.currentMode === 'savedReference') {
+                formData.append('reference', this.get('referenceDropdown').value);
             }
-            const response = await fetch(`${this.apiUrl}/analyze`, { method: 'POST', body: formData });
-            if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), this.config.apiTimeout);
+
+            const response = await fetch(`${this.apiUrl}/analyze`, {
+                method: 'POST',
+                body: formData,
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ detail: response.statusText }));
+                throw new Error(`Serverfehler ${response.status}: ${errorData.detail}`);
+            }
+
             const result = await response.json();
+            if (!result.success) throw new Error(result.detail || 'Analyse fehlgeschlagen');
+            
             this.displayResults(result);
             this.updateAnalysisMetrics(result);
         } catch (error) {
-            console.error('Analyse-Fehler:', error);
-            this.showStatus(`Fehler bei der Analyse: ${error.message}`, 'error');
+            console.error('Analysis error:', error);
+            const message = error.name === 'AbortError' ? 'Analyse-Timeout: Server antwortet nicht.' : error.message;
+            this.showStatus(`Fehler bei der Analyse: ${message}`, 'error');
         } finally {
+            this.state.isAnalyzing = false;
             this.setLoading(false);
         }
     }
 
+    /**
+     * Displays the analysis results in the UI.
+     * @param {object} result - The result object from the API.
+     */
     displayResults(result) {
-        const resultsContainer = document.getElementById('resultsContainer');
-        const resultsContent = document.getElementById('resultsContent');
+        const resultsContent = this.get('resultsContent');
+        if (!resultsContent) return;
+
+        const getExposureLabel = (level) => ({
+            'low': 'Niedrig', 'medium': 'Mittel', 'high': 'Hoch', 'extreme': 'Extrem'
+        }[level] || 'Unbekannt');
+
         resultsContent.innerHTML = `
             <div class="results-grid">
                 <div class="result-card"><div class="result-label">UV-Dosis</div><div class="result-value">${result.uv_dose || 'N/A'}</div><div class="result-unit">J/cm²</div></div>
-                <div class="result-card"><div class="result-label">Expositionsstufe</div><div class="result-value level-${result.exposure_level}">${this.getExposureLabel(result.exposure_level)}</div></div>
+                <div class="result-card"><div class="result-label">Expositionsstufe</div><div class="result-value level-${result.exposure_level}">${getExposureLabel(result.exposure_level)}</div></div>
                 <div class="result-card"><div class="result-label">Konfidenz</div><div class="result-value">${result.confidence || 'N/A'}</div></div>
             </div>
             <div class="save-results-panel">
                 <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-weight: var(--font-weight-semibold);">Messung speichern</h4>
                 <div class="save-form">
-                    <input type="text" id="measurementName" placeholder="Messungsname (optional)">
-                    <textarea id="measurementNotes" placeholder="Notizen (optional)"></textarea>
-                    <div style="display: flex; gap: 1rem;"><button id="saveResultBtn" class="btn luvex-cta-primary" style="flex: 1;">Speichern</button><button id="discardResultBtn" class="btn luvex-cta-secondary" style="flex: 1;">Verwerfen</button></div>
+                    <label for="measurementName">Messungsname</label>
+                    <input type="text" id="measurementName" placeholder="z.B. Labor Messung #1">
+                    <label for="measurementNotes">Notizen (optional)</label>
+                    <textarea id="measurementNotes" placeholder="Zusätzliche Informationen..."></textarea>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button id="saveResultBtn" class="btn luvex-cta-primary" style="flex: 1;">Speichern</button>
+                        <button id="discardResultBtn" class="btn luvex-cta-secondary" style="flex: 1;">Verwerfen</button>
+                    </div>
                 </div>
             </div>`;
-        resultsContainer.style.display = 'block';
+
+        this.get('resultsContainer').style.display = 'block';
         this.showStatus('Analyse erfolgreich abgeschlossen!', 'success');
+
         document.getElementById('saveResultBtn').addEventListener('click', () => this.saveResults(result));
         document.getElementById('discardResultBtn').addEventListener('click', () => this.discardResults());
     }
-
-    saveResults(result) {
-        const measurementName = document.getElementById('measurementName').value || `Messung ${new Date().toLocaleString('de-DE')}`;
-        const measurement = {
-            id: Date.now().toString(),
-            name: measurementName,
-            notes: document.getElementById('measurementNotes').value || '',
-            timestamp: new Date().toISOString(),
-            filename: this.currentImage.name,
-            mode: this.currentMode,
-            results: result
-        };
-        const savedMeasurements = JSON.parse(localStorage.getItem('uvMeasurements') || '[]');
-        savedMeasurements.unshift(measurement);
-        if (savedMeasurements.length > 50) savedMeasurements.pop();
-        localStorage.setItem('uvMeasurements', JSON.stringify(savedMeasurements));
-        this.showStatus(`Messung "${measurementName}" erfolgreich gespeichert!`, 'success');
-        document.getElementById('lastAnalysis').textContent = new Date().toLocaleString('de-DE');
-    }
-
-    discardResults() {
-        document.getElementById('resultsContainer').style.display = 'none';
-        this.showStatus('Ergebnisse verworfen.', 'info');
-    }
-
-    resetAnalysis() {
-        document.getElementById('imagePreview').style.display = 'none';
-        document.getElementById('resultsContainer').style.display = 'none';
-        document.getElementById('analyzeBtn').disabled = true;
-        this.currentImage = null;
-        this.updateDashboard('processingTime', '--');
-        this.updateDashboard('confidenceLevel', '--');
-        this.showStatus('', '');
-    }
-
+    
+    /**
+     * Updates dashboard metrics after an analysis.
+     * @param {object} result - The result object from the API.
+     */
     updateAnalysisMetrics(result) {
-        const processingTime = Date.now() - this.analysisStartTime;
-        this.updateDashboard('processingTime', `${processingTime}ms`);
-        this.updateDashboard('confidenceLevel', result.confidence || '--');
+        const processingTime = Date.now() - this.state.analysisStartTime;
+        this.updateText('processingTime', `${processingTime}ms`);
+        this.updateText('confidenceLevel', result.confidence || '--');
     }
 
-    updateDashboard(elementId, value) {
-        const element = document.getElementById(elementId);
-        if (element) element.textContent = value;
-    }
-
-    getExposureLabel(level) {
-        return { 'low': 'Niedrig', 'medium': 'Mittel', 'high': 'Hoch', 'extreme': 'Extrem' }[level] || 'Unbekannt';
-    }
-
-    setLoading(isLoading) {
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const spinner = document.getElementById('loadingSpinner');
-        analyzeBtn.disabled = isLoading;
-        analyzeBtn.textContent = isLoading ? 'Analysiere...' : 'Analyse starten';
-        if (spinner) spinner.style.display = isLoading ? 'block' : 'none';
-    }
-
-    showStatus(message, type = 'info') {
-        const statusEl = document.getElementById('statusMessage');
-        if (!statusEl) return;
-        if (message) {
-            statusEl.textContent = message;
-            statusEl.className = `status-message status-${type}`;
-            statusEl.style.display = 'block';
-            if (type === 'success' || type === 'info') {
-                setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
-            }
-        } else {
-            statusEl.style.display = 'none';
-        }
-    }
-
+    /**
+     * Checks the health of the backend API.
+     */
     async checkBackendHealth() {
         try {
             const response = await fetch(`${this.apiUrl}/health`);
             if (!response.ok) throw new Error('Offline');
-            document.getElementById('backendStatus').textContent = 'Online';
-            document.getElementById('backendStatus').style.color = '#10b981';
+            this.updateText('backendStatus', 'Online');
+            this.get('backendStatus').style.color = 'var(--success-color)';
         } catch (error) {
-            document.getElementById('backendStatus').textContent = 'Offline';
-            document.getElementById('backendStatus').style.color = '#ef4444';
-            this.showStatus('Backend nicht erreichbar. Bitte starten Sie den Server.', 'error');
+            this.updateText('backendStatus', 'Offline');
+            this.get('backendStatus').style.color = 'var(--danger-color)';
+            this.showStatus('Backend nicht erreichbar. Bitte Server starten.', 'error');
         }
     }
 
-    showAllMeasurements() {
-        const measurements = JSON.parse(localStorage.getItem('uvMeasurements') || '[]');
-        this.measurementsList.innerHTML = '';
-        if (measurements.length === 0) {
-            this.measurementsList.innerHTML = `
-                <div class="modal-empty-state">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    <p>Noch keine Messungen gespeichert.</p>
-                </div>`;
-        } else {
-            measurements.forEach(m => {
-                const item = document.createElement('div');
-                item.className = 'measurement-item';
-                const date = new Date(m.timestamp).toLocaleString('de-DE');
-                const dose = m.results.uv_dose || 'N/A';
-                const level = this.getExposureLabel(m.results.exposure_level);
-                item.innerHTML = `
-                    <div class="measurement-header">${m.name}</div>
-                    <div class="measurement-details">
-                        <div class="measurement-detail-item"><strong>Datum:</strong><span>${date}</span></div>
-                        <div class="measurement-detail-item"><strong>UV-Dosis:</strong><span>${dose} J/cm²</span></div>
-                        <div class="measurement-detail-item"><strong>Stufe:</strong><span class="level-${m.results.exposure_level}">${level}</span></div>
-                        <div class="measurement-detail-item"><strong>Modus:</strong><span>${m.mode === 'withReference' ? 'Referenz im Bild' : 'Gespeicherte Referenz'}</span></div>
-                    </div>`;
-                this.measurementsList.appendChild(item);
-            });
+    //=========================================================================
+    // Data Persistence (LocalStorage)
+    //=========================================================================
+
+    /**
+     * Saves the current application state to LocalStorage.
+     */
+    saveAppState() {
+        try {
+            localStorage.setItem('luvexAppState', JSON.stringify({
+                currentMode: this.state.currentMode
+            }));
+        } catch (e) {
+            console.warn('Could not save app state to LocalStorage.', e);
         }
-        this.openModal(this.measurementsModal);
     }
 
+    /**
+     * Loads application state from LocalStorage.
+     */
+    loadAppState() {
+        try {
+            const savedState = JSON.parse(localStorage.getItem('luvexAppState'));
+            if (savedState && savedState.currentMode) {
+                this.setMode(savedState.currentMode);
+            }
+        } catch (e) {
+            console.warn('Could not load app state from LocalStorage.', e);
+        }
+    }
+
+    /**
+     * Saves the analysis result to LocalStorage.
+     * @param {object} result - The result object from the API.
+     */
+    saveResults(result) {
+        const measurementName = document.getElementById('measurementName').value.trim() || `Messung ${new Date().toLocaleString('de-DE')}`;
+        const measurement = {
+            id: Date.now().toString(),
+            name: measurementName,
+            notes: document.getElementById('measurementNotes').value.trim() || '',
+            timestamp: new Date().toISOString(),
+            filename: this.state.currentImage.name,
+            mode: this.state.currentMode,
+            results: result
+        };
+        const savedMeasurements = JSON.parse(localStorage.getItem('uvMeasurements') || '[]');
+        savedMeasurements.unshift(measurement);
+        if (savedMeasurements.length > this.config.maxMeasurements) savedMeasurements.pop();
+        localStorage.setItem('uvMeasurements', JSON.stringify(savedMeasurements));
+        this.showStatus(`Messung "${measurementName}" gespeichert!`, 'success');
+        this.updateText('lastAnalysis', new Date().toLocaleString('de-DE'));
+        this.discardResults(); // Hide the save form after saving
+    }
+    
+    /**
+     * Hides the results container.
+     */
+    discardResults() {
+        this.get('resultsContainer').style.display = 'none';
+    }
+
+    /**
+     * Saves a new custom reference to LocalStorage.
+     */
     async saveNewReference() {
-        const name = document.getElementById('newReferenceName').value;
-        const range = document.getElementById('newReferenceRange').value;
+        const name = this.get('newReferenceName').value.trim();
+        const range = this.get('newReferenceRange').value.trim();
 
-        if (!name || !range || !this.newReferenceImage) {
-            this.showStatus('Bitte füllen Sie alle Felder aus und laden Sie ein Bild hoch.', 'error');
+        if (!name || !range || !this.state.newReferenceImage) {
+            this.showStatus('Bitte alle Felder ausfüllen und ein Bild hochladen.', 'error');
             return;
         }
 
-        const imageData = await this.readFileAsDataURL(this.newReferenceImage);
-        
-        const newReference = {
-            id: `custom_${Date.now()}`,
-            name: name,
-            range: range,
-            imageData: imageData
-        };
+        try {
+            const imageData = await this.readFileAsDataURL(this.state.newReferenceImage);
+            const newReference = {
+                id: `custom_${Date.now()}`,
+                name,
+                range,
+                imageData
+            };
+            const references = JSON.parse(localStorage.getItem('uvReferences') || '[]');
+            references.push(newReference);
+            localStorage.setItem('uvReferences', JSON.stringify(references));
 
-        const references = JSON.parse(localStorage.getItem('uvReferences') || '[]');
-        references.push(newReference);
-        localStorage.setItem('uvReferences', JSON.stringify(references));
-
-        this.showStatus(`Referenz "${name}" erfolgreich gespeichert.`, 'success');
-        this.closeModal(this.addReferenceModal);
-        this.populateReferences();
-        
-        document.getElementById('newReferenceName').value = '';
-        document.getElementById('newReferenceRange').value = '';
-        document.getElementById('referenceImagePreview').style.display = 'none';
-        this.newReferenceImage = null;
+            this.showStatus(`Referenz "${name}" gespeichert.`, 'success');
+            this.closeModal(this.get('addReferenceModal'));
+            this.populateReferences();
+            this.resetAddReferenceForm();
+        } catch (error) {
+            this.showStatus(`Fehler beim Speichern der Referenz: ${error.message}`, 'error');
+        }
+    }
+    
+    /**
+     * Resets the form for adding a new reference.
+     */
+    resetAddReferenceForm() {
+        this.get('newReferenceName').value = '';
+        this.get('newReferenceRange').value = '';
+        this.get('referenceImagePreview').style.display = 'none';
+        this.get('fileInputReference').value = '';
+        this.state.newReferenceImage = null;
     }
 
+    /**
+     * Deletes a specific custom reference from LocalStorage.
+     * @param {string} referenceId - The ID of the reference to delete.
+     */
+    deleteReference(referenceId) {
+        let references = JSON.parse(localStorage.getItem('uvReferences') || '[]');
+        const refToDelete = references.find(r => r.id === referenceId);
+        if (!refToDelete) return;
+
+        this.showConfirm(
+            'Referenz löschen',
+            `Möchten Sie die Referenz "${refToDelete.name}" wirklich löschen?`,
+            () => {
+                const updatedReferences = references.filter(ref => ref.id !== referenceId);
+                localStorage.setItem('uvReferences', JSON.stringify(updatedReferences));
+                this.showStatus(`Referenz "${refToDelete.name}" gelöscht.`, 'info');
+                this.populateReferences();
+                this.showManageLibrary(); // Refresh the modal list
+            }
+        );
+    }
+
+    /**
+     * Handles the deletion of all measurements.
+     */
+    handleDeleteAllMeasurements() {
+        this.showConfirm(
+            'Alle Messungen löschen',
+            'Möchten Sie wirklich alle Messungen löschen? Diese Aktion ist endgültig.',
+            () => {
+                localStorage.removeItem('uvMeasurements');
+                this.showStatus('Alle Messungen gelöscht.', 'info');
+                this.closeModal(this.get('settingsModal'));
+            }
+        );
+    }
+
+    /**
+     * Handles the deletion of all custom references.
+     */
+    handleDeleteAllReferences() {
+        this.showConfirm(
+            'Alle Referenzen löschen',
+            'Möchten Sie wirklich alle benutzerdefinierten Referenzen löschen?',
+            () => {
+                localStorage.removeItem('uvReferences');
+                this.showStatus('Alle Referenzen gelöscht.', 'info');
+                this.populateReferences();
+                this.closeModal(this.get('settingsModal'));
+            }
+        );
+    }
+
+    //=========================================================================
+    // Modal and Dynamic Content
+    //=========================================================================
+
+    /**
+     * Opens a modal with an animation.
+     * @param {HTMLElement} modal - The modal element to open.
+     */
+    openModal(modal) {
+        if (!modal) return;
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('visible'), 10);
+    }
+
+    /**
+     * Closes a modal with an animation.
+     * @param {HTMLElement} modal - The modal element to close.
+     */
+    closeModal(modal) {
+        if (!modal) return;
+        modal.classList.remove('visible');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300); // Match CSS transition duration
+    }
+    
+    /**
+     * Displays a confirmation dialog.
+     * @param {string} title - The title of the confirmation.
+     * @param {string} message - The confirmation message.
+     * @param {Function} onConfirm - The callback to execute if confirmed.
+     */
+    showConfirm(title, message, onConfirm) {
+        this.updateText('confirmTitle', title);
+        this.updateText('confirmMessage', message);
+
+        // Clone and replace button to remove old listeners, preventing multiple executions
+        const oldBtn = this.get('confirmOkBtn');
+        const newBtn = oldBtn.cloneNode(true);
+        oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+        this.domCache.set('confirmOkBtn', newBtn); // Update cache
+
+        newBtn.onclick = () => {
+            onConfirm();
+            this.closeModal(this.get('confirmModal'));
+        };
+        this.openModal(this.get('confirmModal'));
+    }
+
+    /**
+     * Populates the reference dropdown and library list from LocalStorage.
+     */
     populateReferences() {
         const customReferences = JSON.parse(localStorage.getItem('uvReferences') || '[]');
-        
-        // Populate Dropdown
-        this.referenceDropdown.querySelectorAll('option[value^="custom_"]').forEach(opt => opt.remove());
+        const dropdown = this.get('referenceDropdown');
+        const listContainer = this.get('referenceList');
+
+        // --- Populate Dropdown ---
+        dropdown.querySelectorAll('option[value^="custom_"]').forEach(opt => opt.remove());
         customReferences.forEach(ref => {
             const option = document.createElement('option');
             option.value = ref.id;
             option.textContent = `${ref.name} (${ref.range})`;
-            this.referenceDropdown.appendChild(option);
+            dropdown.appendChild(option);
         });
 
-        // Populate Library List
-        this.referenceListContainer.innerHTML = '';
+        // --- Populate Library List ---
+        listContainer.innerHTML = ''; // Clear existing list
         const defaultRefs = [
             { name: 'Standard UV-Strip', range: '0-500 J/cm²' },
             { name: 'UVC-Strip', range: '0-100 J/cm²' },
             { name: 'UVA-Strip', range: '0-1000 J/cm²' }
         ];
         const allRefs = [...defaultRefs, ...customReferences];
+        const fragment = document.createDocumentFragment();
         allRefs.forEach(ref => {
             const item = document.createElement('div');
             item.className = 'metric-item';
-            item.innerHTML = `<span class="metric-label">${ref.name}:</span><span class="metric-value">${ref.range}</span>`;
-            this.referenceListContainer.appendChild(item);
+            item.innerHTML = `<span class="metric-label">${this.escapeHtml(ref.name)}:</span><span class="metric-value">${this.escapeHtml(ref.range)}</span>`;
+            fragment.appendChild(item);
         });
+        listContainer.appendChild(fragment);
 
-        // Enable/disable manage button
-        this.manageLibraryBtn.disabled = customReferences.length === 0;
+        this.get('manageLibraryBtn').disabled = customReferences.length === 0;
+    }
+
+    /**
+     * Shows the modal with all saved measurements.
+     */
+    showAllMeasurements() {
+        const measurements = JSON.parse(localStorage.getItem('uvMeasurements') || '[]');
+        const listContainer = this.get('measurementsList');
+        listContainer.innerHTML = ''; // Clear previous content
+
+        if (measurements.length === 0) {
+            listContainer.innerHTML = this.getEmptyStateHTML('Noch keine Messungen gespeichert.');
+        } else {
+            const fragment = document.createDocumentFragment();
+            measurements.forEach(m => fragment.appendChild(this.createMeasurementItem(m)));
+            listContainer.appendChild(fragment);
+        }
+        this.openModal(this.get('measurementsModal'));
     }
     
+    /**
+     * Creates an HTML element for a single measurement item.
+     * @param {object} m - The measurement object.
+     * @returns {HTMLElement} The created div element.
+     */
+    createMeasurementItem(m) {
+        const item = document.createElement('div');
+        item.className = 'measurement-item';
+        const date = new Date(m.timestamp).toLocaleString('de-DE');
+        const dose = m.results.uv_dose || 'N/A';
+        const level = { 'low': 'Niedrig', 'medium': 'Mittel', 'high': 'Hoch', 'extreme': 'Extrem' }[m.results.exposure_level] || 'Unbekannt';
+        const mode = m.mode === 'withReference' ? 'Referenz im Bild' : 'Gespeicherte Referenz';
+
+        item.innerHTML = `
+            <div class="measurement-header">${this.escapeHtml(m.name)}</div>
+            <div class="measurement-details">
+                <div class="measurement-detail-item"><strong>Datum:</strong><span>${date}</span></div>
+                <div class="measurement-detail-item"><strong>UV-Dosis:</strong><span>${dose} J/cm²</span></div>
+                <div class="measurement-detail-item"><strong>Stufe:</strong><span class="level-${m.results.exposure_level}">${level}</span></div>
+                <div class="measurement-detail-item"><strong>Modus:</strong><span>${mode}</span></div>
+            </div>
+            ${m.notes ? `<div class="measurement-notes"><strong>Notizen:</strong> <p>${this.escapeHtml(m.notes)}</p></div>` : ''}`;
+        return item;
+    }
+
+    /**
+     * Shows the modal to manage custom references.
+     */
     showManageLibrary() {
         const customReferences = JSON.parse(localStorage.getItem('uvReferences') || '[]');
-        this.manageLibraryList.innerHTML = '';
+        const listContainer = this.get('manageLibraryList');
+        listContainer.innerHTML = '';
 
         if (customReferences.length === 0) {
-            this.manageLibraryList.innerHTML = `
-                <div class="modal-empty-state">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                    <p>Keine benutzerdefinierten Referenzen vorhanden.</p>
-                </div>`;
+            listContainer.innerHTML = this.getEmptyStateHTML('Keine benutzerdefinierten Referenzen vorhanden.');
         } else {
+            const fragment = document.createDocumentFragment();
             customReferences.forEach(ref => {
                 const item = document.createElement('div');
                 item.className = 'reference-manage-item';
                 item.innerHTML = `
                     <div class="reference-manage-info">
-                        <strong>${ref.name}</strong>
-                        <span>${ref.range}</span>
+                        <strong>${this.escapeHtml(ref.name)}</strong>
+                        <span>${this.escapeHtml(ref.range)}</span>
                     </div>
                     <div class="reference-manage-actions">
-                        <button class="btn-icon btn-delete" data-id="${ref.id}">
+                        <button class="btn-icon btn-delete" data-id="${ref.id}" aria-label="Referenz ${this.escapeHtml(ref.name)} löschen">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>
-                    </div>
-                `;
-                this.manageLibraryList.appendChild(item);
+                    </div>`;
+                fragment.appendChild(item);
             });
+            listContainer.appendChild(fragment);
         }
-        this.openModal(this.manageLibraryModal);
+        this.openModal(this.get('manageLibraryModal'));
     }
 
-    deleteReference(referenceId) {
-        let references = JSON.parse(localStorage.getItem('uvReferences') || '[]');
-        const referenceToDelete = references.find(r => r.id === referenceId);
-        
-        if (!referenceToDelete) return;
+    //=========================================================================
+    // Utilities
+    //=========================================================================
 
-        this.showConfirm(
-            'Referenz löschen',
-            `Möchten Sie die Referenz "${referenceToDelete.name}" wirklich endgültig löschen?`,
-            () => {
-                references = references.filter(ref => ref.id !== referenceId);
-                localStorage.setItem('uvReferences', JSON.stringify(references));
-                this.showStatus(`Referenz "${referenceToDelete.name}" gelöscht.`, 'info');
-                this.populateReferences();
-                this.showManageLibrary(); // Refresh the list in the modal
-            }
-        );
+    /**
+     * Sanitizes a string to prevent XSS.
+     * @param {string} unsafe - The raw string.
+     * @returns {string} The sanitized string.
+     */
+    escapeHtml(unsafe) {
+        if (typeof unsafe !== 'string') return '';
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
-    handleDeleteAllMeasurements() {
-        this.showConfirm(
-            'Alle Messungen löschen',
-            'Möchten Sie wirklich alle gespeicherten Messungen endgültig löschen? Diese Aktion kann nicht rückgängig gemacht werden.',
-            () => {
-                localStorage.removeItem('uvMeasurements');
-                this.showStatus('Alle Messungen wurden gelöscht.', 'info');
-                this.closeModal(this.settingsModal);
-            }
-        );
-    }
-
-    handleDeleteAllReferences() {
-        this.showConfirm(
-            'Alle Referenzen löschen',
-            'Möchten Sie wirklich alle benutzerdefinierten Referenzen endgültig löschen? Diese Aktion kann nicht rückgängig gemacht werden.',
-            () => {
-                localStorage.removeItem('uvReferences');
-                this.showStatus('Alle benutzerdefinierten Referenzen wurden gelöscht.', 'info');
-                this.populateReferences();
-                this.closeModal(this.settingsModal);
-            }
-        );
-    }
-    
-    showConfirm(title, message, onConfirm) {
-        document.getElementById('confirmTitle').textContent = title;
-        document.getElementById('confirmMessage').textContent = message;
-        
-        // Clone and replace the button to remove old event listeners
-        const newOkBtn = this.confirmOkBtn.cloneNode(true);
-        this.confirmOkBtn.parentNode.replaceChild(newOkBtn, this.confirmOkBtn);
-        this.confirmOkBtn = newOkBtn;
-        
-        this.confirmOkBtn.onclick = () => {
-            onConfirm();
-            this.closeModal(this.confirmModal);
-        };
-        
-        this.openModal(this.confirmModal);
-    }
-
-
-    openModal(modal) {
-        modal.style.display = 'flex';
-        setTimeout(() => modal.classList.add('visible'), 10);
-    }
-
-    closeModal(modal) {
-        modal.classList.remove('visible');
-        setTimeout(() => { modal.style.display = 'none'; }, 300);
+    /**
+     * Generates HTML for an empty state message in modals.
+     * @param {string} message - The message to display.
+     * @returns {string} The HTML string.
+     */
+    getEmptyStateHTML(message) {
+        return `
+            <div class="modal-empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                <p>${this.escapeHtml(message)}</p>
+            </div>`;
     }
 }
 
-// Initialize when DOM is loaded
+// Initialize the application once the DOM is fully loaded.
 document.addEventListener('DOMContentLoaded', () => {
     window.uvAnalyzer = new UVStripAnalyzer();
 });
