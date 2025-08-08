@@ -9,6 +9,7 @@ import base64
 import cv2
 from typing import Dict, Any
 import logging
+from strip_detector import StripDetector
 
 # Logging setup
 logging.basicConfig(level=logging.INFO)
@@ -183,6 +184,7 @@ class UVStripAnalyzer:
 
 # Globale Analyzer-Instanz
 analyzer = UVStripAnalyzer()
+strip_detector = StripDetector()
 
 @app.get("/")
 async def root():
@@ -221,7 +223,7 @@ async def analyze_uv_strip(file: UploadFile = File(...)):
         processed_image = analyzer.preprocess_image(image)
         
         # Strip-Region extrahieren
-        strip_region = analyzer.extract_strip_region(processed_image)
+        strip_region = strip_detector.detect_strip(processed_image)
         
         # Farbanalyse
         color_data = analyzer.analyze_color_change(strip_region)
