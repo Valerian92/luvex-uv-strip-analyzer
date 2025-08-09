@@ -21,14 +21,25 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware für Frontend-Backend Kommunikation
+# --- WICHTIGE ÄNDERUNG FÜR SERVER-BETRIEB ---
+# CORS (Cross-Origin Resource Sharing) Konfiguration
+# Wir erlauben nur bestimmten Domains den Zugriff auf die API.
+origins = [
+    "http://localhost",
+    "http://localhost:8080",  # Falls du einen lokalen Dev-Server für das Frontend nutzt
+    "http://127.0.0.1",
+    "http://analyzer.luvex.tech",
+    "https://analyzer.luvex.tech", # Wichtig für später mit SSL
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In Production: spezifische Origins
+    allow_origins=origins, # Nur diese Domains dürfen zugreifen
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST"], # Beschränken auf genutzte Methoden
     allow_headers=["*"],
 )
+
 
 class UVStripAnalyzer:
     """Hauptklasse für UV-Strip Analyse"""
