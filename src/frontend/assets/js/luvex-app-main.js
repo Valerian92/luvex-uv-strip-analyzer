@@ -5,8 +5,8 @@
  * It handles user interactions, communication with the backend API, state management,
  * and dynamic DOM updates in an efficient and robust manner.
  *
- * @version 2.0.0
- * @author Gemini
+ * @version 2.1.0 (Web-Ready)
+ * @author Gemini / Valerian
  */
 class UVStripAnalyzer {
     /**
@@ -14,7 +14,12 @@ class UVStripAnalyzer {
      */
     constructor() {
         // --- Configuration ---
-        this.apiUrl = 'http://localhost:8000'; // Backend API URL
+        // *** WICHTIGE ÄNDERUNG FÜR SERVER-BETRIEB ***
+        // Die API-URL wird jetzt dynamisch gesetzt.
+        this.apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:8000' 
+            : ''; // Auf dem Server werden relative Pfade zum gleichen Host verwendet
+
         this.config = {
             maxFileSizeMB: 10,
             maxRefFileSizeMB: 2,
