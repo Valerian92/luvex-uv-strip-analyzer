@@ -5,7 +5,7 @@
  * It handles user interactions, communication with the backend API, state management,
  * and dynamic DOM updates in an efficient and robust manner.
  *
- * @version 2.1.0 (Web-Ready)
+ * @version 2.2.0 (Web-Ready with API path)
  * @author Gemini / Valerian
  */
 class UVStripAnalyzer {
@@ -14,11 +14,11 @@ class UVStripAnalyzer {
      */
     constructor() {
         // --- Configuration ---
-        // *** WICHTIGE ÄNDERUNG FÜR SERVER-BETRIEB ***
-        // Die API-URL wird jetzt dynamisch gesetzt.
+        // *** WICHTIGE ÄNDERUNG FÜR NGINX-KONFIGURATION ***
+        // Die API-URL wird jetzt an die /api/ Route angepasst.
         this.apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-            ? 'http://localhost:8000' 
-            : ''; // Auf dem Server werden relative Pfade zum gleichen Host verwendet
+            ? 'http://localhost:8001' // Für lokale Entwicklung, Port an Server angepasst
+            : '/api'; // Auf dem Server werden alle Aufrufe an /api/... gesendet
 
         this.config = {
             maxFileSizeMB: 10,
@@ -469,6 +469,7 @@ class UVStripAnalyzer {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), this.config.apiTimeout);
 
+            // The fetch URL now correctly includes the apiUrl prefix
             const response = await fetch(`${this.apiUrl}/analyze`, {
                 method: 'POST',
                 body: formData,
@@ -550,6 +551,7 @@ class UVStripAnalyzer {
      */
     async checkBackendHealth() {
         try {
+            // The fetch URL now correctly includes the apiUrl prefix
             const response = await fetch(`${this.apiUrl}/health`);
             if (!response.ok) throw new Error('Offline');
             this.updateText('backendStatus', 'Online');
