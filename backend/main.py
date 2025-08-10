@@ -20,6 +20,10 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from strip_detector import StripDetector
 
+import jwt
+from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, Header
+from typing import Optional
+
 # --- Logging Setup ---
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -31,12 +35,39 @@ engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+# --- JWT-Konfiguration ---
+JWT_SECRET = "5206c6fa4220e2c4557c9e739a360329281d0fae12f37404104ee664bcd075d4"
+JWT_ALGORITHM = "HS256"
+JWT_AUDIENCE = "luvex-uvstrip-analyzer"
+
+# --- JWT-Token Validierung ---
+def validate_jwt_token(authorization: Optional[str] = Header(None)):
+    """Validiert JWT-Token aus Authorization Header"""
+    if not authorization:
+        return None  # Kein Token = anonymer Zugriff erlaubt
+    
+    try:
+        if not authorization.startswith("Bearer "):
+            return None
+            
+        token = authorization.replace("Bearer ", "")
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM], audience=JWT_AUDIENCE)
+        
+        return {
+            "user_id": payload.get("user_id"),
+            "username": payload.get("username"),
+            "valid": True
+        }
+    except jwt.InvalidTokenError:
+        return None  # Ungültiger Token = anonymer Zugriff
+
 
 # --- Datenbank-Modell für eine Messung ---
 class Measurement(Base):
     __tablename__ = "measurements"
     id = Column(Integer, primary_key=True, index=True)
-    # user_id = Column(Integer, index=True) # Platzhalter für spätere WordPress-Anbindung
+    user_id = Column(Integer, index=True, nullable=True)  # NEU
+    wordpress_username = Column(String, index=True, nullable=True)  # NEU
     name = Column(String, index=True)
     notes = Column(Text, nullable=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
@@ -44,7 +75,7 @@ class Measurement(Base):
     uv_dose = Column(Float)
     exposure_level = Column(String)
     confidence = Column(Float)
-    recommendation = Column(Text) # Empfehlung auch in DB speichern
+    recommendation = Column(Text)
 
 # Erstellt die Datenbank-Tabelle, falls sie nicht existiert.
 Base.metadata.create_all(bind=engine)
@@ -216,7 +247,7 @@ async def get_supported_strip_types():
 # --- API Endpunkte für Messungen ---
 
 @app.post("/measurements", summary="Speichert eine neue Messung in der Datenbank")
-async def create_measurement(data: dict, db: Session = Depends(get_db)):
+async def create_measurement(data: dict, db: Session = Depends(get_db), auth_user = Depends(validate_jwt_token)):
     try:
         new_measurement = Measurement(
             name=data.get("name"),
@@ -225,20 +256,35 @@ async def create_measurement(data: dict, db: Session = Depends(get_db)):
             uv_dose=float(data.get("results", {}).get("uv_dose")),
             exposure_level=data.get("results", {}).get("exposure_level"),
             confidence=float(data.get("results", {}).get("confidence", "0").replace('%','')),
-            recommendation=data.get("results", {}).get("recommendation")
+            recommendation=data.get("results", {}).get("recommendation"),
+            user_id=auth_user.get("user_id") if auth_user else None,  # NEU
+            wordpress_username=auth_user.get("username") if auth_user else None  # NEU
         )
         db.add(new_measurement)
         db.commit()
         db.refresh(new_measurement)
-        logger.info(f"Messung '{new_measurement.name}' mit ID {new_measurement.id} gespeichert.")
+        logger.info(f"Messung '{new_measurement.name}' für User {auth_user.get('username') if auth_user else 'anonymous'} gespeichert.")
         return {"success": True, "id": new_measurement.id}
     except Exception as e:
         logger.error(f"Fehler beim Speichern der Messung: {e}")
         raise HTTPException(status_code=500, detail="Fehler beim Speichern der Messung.")
+    
 
 @app.get("/measurements", response_model=List[Dict[str, Any]], summary="Holt alle Messungen aus der Datenbank")
-async def get_all_measurements(db: Session = Depends(get_db)):
-    measurements = db.query(Measurement).order_by(Measurement.timestamp.desc()).all()
+async def get_all_measurements(db: Session = Depends(get_db), auth_user = Depends(validate_jwt_token)):
+    # Benutzer-spezifische Abfrage
+    if auth_user and auth_user.get("user_id"):
+        measurements = db.query(Measurement).filter(
+            Measurement.user_id == auth_user["user_id"]
+        ).order_by(Measurement.timestamp.desc()).all()
+        logger.info(f"Messungen für User {auth_user['username']} geladen: {len(measurements)}")
+    else:
+        # Fallback: Alle anonymen Messungen (user_id = NULL)
+        measurements = db.query(Measurement).filter(
+            Measurement.user_id.is_(None)
+        ).order_by(Measurement.timestamp.desc()).all()
+        logger.info(f"Anonyme Messungen geladen: {len(measurements)}")
+    
     return [{
         "id": m.id,
         "name": m.name,
@@ -252,7 +298,6 @@ async def get_all_measurements(db: Session = Depends(get_db)):
             "recommendation": m.recommendation
         }
     } for m in measurements]
-
 
 
 
