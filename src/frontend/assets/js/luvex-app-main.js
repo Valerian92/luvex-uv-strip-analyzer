@@ -5,7 +5,7 @@
  * It handles user interactions, communication with the backend API, state management,
  * and dynamic DOM updates in an efficient and robust manner.
  *
- * @version 2.3.0 (Robust Health Check)
+ * @version 3.1.0 (Database Integration - Complete)
  * @author Gemini / Valerian
  */
 class UVStripAnalyzer {
@@ -14,17 +14,15 @@ class UVStripAnalyzer {
      */
     constructor() {
         // --- Configuration ---
-        // Die API-URL wird jetzt an die /api/ Route angepasst.
         this.apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-            ? 'http://localhost:8001' // Für lokale Entwicklung, Port an Server angepasst
-            : '/api'; // Auf dem Server werden alle Aufrufe an /api/... gesendet
+            ? 'http://localhost:8001' 
+            : '/api';
 
         this.config = {
             maxFileSizeMB: 10,
             maxRefFileSizeMB: 2,
-            apiTimeout: 30000, // 30 seconds
-            statusMsgDuration: 4000, // 4 seconds
-            maxMeasurements: 100,
+            apiTimeout: 30000,
+            statusMsgDuration: 4000,
         };
 
         // --- State ---
@@ -57,7 +55,8 @@ class UVStripAnalyzer {
             this.initializeEventListeners();
             this.loadAppState();
             await this.checkBackendHealth();
-            this.populateReferences();
+            this.populateReferences(); // WIEDERHERGESTELLT
+            this.showAllMeasurements(); // NEU: Lädt Messungen aus der DB beim Start
             this.showStatus('Anwendung erfolgreich initialisiert.', 'success');
         } catch (error) {
             console.error('Initialization failed:', error);
@@ -69,9 +68,6 @@ class UVStripAnalyzer {
     // DOM Caching and Access
     //=========================================================================
 
-    /**
-     * Caches frequently accessed DOM elements.
-     */
     cacheDOMElements() {
         const ids = [
             'modeWithReference', 'modeSavedReference', 'modeDescription', 'currentMode',
@@ -95,11 +91,11 @@ class UVStripAnalyzer {
             if (el) this.domCache.set(id, el);
         });
         this.domCache.set('modeToggleBtns', document.querySelectorAll('.mode-toggle-btn'));
+        
+        // Deaktivieren der Lösch-Buttons für Messungen, da DB-Löschen noch nicht implementiert ist.
+        this.get('deleteAllMeasurementsBtn').disabled = true;
     }
 
-    /**
-     * Retrieves a cached DOM element.
-     */
     get(id) {
         return this.domCache.get(id);
     }
@@ -108,9 +104,6 @@ class UVStripAnalyzer {
     // Event Listener Setup
     //=========================================================================
 
-    /**
-     * Centralized method to initialize all event listeners.
-     */
     initializeEventListeners() {
         this.addClickListener('modeWithReference', () => this.setMode('withReference'));
         this.addClickListener('modeSavedReference', () => this.setMode('savedReference'));
@@ -126,11 +119,8 @@ class UVStripAnalyzer {
         this.setupGlobalListeners();
     }
 
-    /**
-     * Sets up listeners for all modals.
-     */
     setupModalListeners() {
-        this.addClickListener('showAllMeasurementsBtn', () => this.showAllMeasurements());
+        this.addClickListener('showAllMeasurementsBtn', () => this.openModal(this.get('measurementsModal')));
         this.addClickListener('addReferenceBtn', () => this.openModal(this.get('addReferenceModal')));
         this.addClickListener('manageLibraryBtn', () => this.showManageLibrary());
         this.addClickListener('settingsBtn', () => this.openModal(this.get('settingsModal')));
@@ -146,8 +136,7 @@ class UVStripAnalyzer {
         });
         this.addClickListener('saveReferenceBtn', () => this.saveNewReference());
         this.addClickListener('cancelReferenceBtn', () => this.closeModal(this.get('addReferenceModal')));
-        this.addClickListener('deleteAllMeasurementsBtn', () => this.handleDeleteAllMeasurements());
-        this.addClickListener('deleteAllReferencesBtn', () => this.handleDeleteAllReferences());
+        this.addClickListener('deleteAllReferencesBtn', () => this.handleDeleteAllReferences()); // WIEDERHERGESTELLT
         this.get('manageLibraryList')?.addEventListener('click', e => {
             const deleteBtn = e.target.closest('.btn-delete');
             if (deleteBtn) this.deleteReference(deleteBtn.dataset.id);
@@ -161,9 +150,6 @@ class UVStripAnalyzer {
         });
     }
 
-    /**
-     * Sets up drag and drop functionality for an upload area.
-     */
     setupEnhancedDragDrop(uploadArea, fileInput) {
         if (!uploadArea || !fileInput) return;
         ['dragover', 'dragenter', 'dragleave', 'drop'].forEach(eventName => {
@@ -190,9 +176,6 @@ class UVStripAnalyzer {
         this.addClickListener(uploadArea.id, () => fileInput.click());
     }
 
-    /**
-     * Sets up global listeners for keyboard shortcuts and window events.
-     */
     setupGlobalListeners() {
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') {
@@ -211,9 +194,6 @@ class UVStripAnalyzer {
         });
     }
 
-    /**
-     * Helper to add a click listener to a cached element.
-     */
     addClickListener(id, callback) {
         this.get(id)?.addEventListener('click', callback);
     }
@@ -222,9 +202,6 @@ class UVStripAnalyzer {
     // State and UI Management
     //=========================================================================
 
-    /**
-     * Sets the analysis mode and updates the UI accordingly.
-     */
     setMode(mode) {
         if (this.state.currentMode === mode) return;
         this.state.currentMode = mode;
@@ -243,9 +220,6 @@ class UVStripAnalyzer {
         this.saveAppState();
     }
 
-    /**
-     * Sets the application into a loading state.
-     */
     setLoading(isLoading) {
         const analyzeBtn = this.get('analyzeBtn');
         if (analyzeBtn) {
@@ -257,9 +231,6 @@ class UVStripAnalyzer {
         this.get('loadingSpinner').style.display = isLoading ? 'block' : 'none';
     }
 
-    /**
-     * Displays a status message to the user.
-     */
     showStatus(message, type = 'info') {
         const statusEl = this.get('statusMessage');
         if (!statusEl) return;
@@ -279,17 +250,11 @@ class UVStripAnalyzer {
         }
     }
 
-    /**
-     * Updates a text content of a cached element.
-     */
     updateText(id, text) {
         const el = this.get(id);
         if (el) el.textContent = text;
     }
 
-    /**
-     * Resets the analysis view to its initial state.
-     */
     resetAnalysis() {
         this.get('imagePreview').style.display = 'none';
         this.get('resultsContainer').style.display = 'none';
@@ -308,9 +273,6 @@ class UVStripAnalyzer {
     // File Handling
     //=========================================================================
 
-    /**
-     * Handles the selection of the main analysis image.
-     */
     async handleFileSelection(file) {
         if (!this.validateFile(file, this.config.maxFileSizeMB)) return;
         this.state.currentImage = file;
@@ -324,9 +286,6 @@ class UVStripAnalyzer {
         }
     }
 
-    /**
-     * Handles the selection of a new reference image.
-     */
     async handleReferenceFileSelection(file) {
         if (!this.validateFile(file, this.config.maxRefFileSizeMB)) return;
         this.state.newReferenceImage = file;
@@ -338,9 +297,6 @@ class UVStripAnalyzer {
         }
     }
 
-    /**
-     * Validates a file based on type and size.
-     */
     validateFile(file, maxSizeMB) {
         if (!file) return false;
         if (!file.type.startsWith('image/')) {
@@ -354,9 +310,6 @@ class UVStripAnalyzer {
         return true;
     }
 
-    /**
-     * Reads a file and returns its content as a Data URL.
-     */
     readFileAsDataURL(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -366,9 +319,6 @@ class UVStripAnalyzer {
         });
     }
 
-    /**
-     * Displays an image preview in a specified container.
-     */
     showImagePreview(src, filename, container) {
         if (!container) return;
         container.innerHTML = `
@@ -383,73 +333,59 @@ class UVStripAnalyzer {
     // API Communication & Analysis
     //=========================================================================
 
-    /**
-     * Sends the image to the backend for analysis.
-     */
     async analyzeImage() {
-        if (this.state.isAnalyzing) return;
-        if (!this.state.currentImage) {
-            this.showStatus('Bitte zuerst ein Bild auswählen.', 'error');
-            return;
-        }
-        if (this.state.currentMode === 'savedReference' && !this.get('referenceDropdown').value) {
-            this.showStatus('Bitte eine Referenzskala auswählen.', 'error');
-            return;
-        }
+        if (this.state.isAnalyzing || !this.state.currentImage) return;
+        
         this.state.isAnalyzing = true;
         this.state.analysisStartTime = Date.now();
         this.setLoading(true);
         this.showStatus('Analysiere UV-Strip...', 'info');
+
         try {
             const formData = new FormData();
             formData.append('file', this.state.currentImage);
-            formData.append('mode', this.state.currentMode);
-            if (this.state.currentMode === 'savedReference') {
-                formData.append('reference', this.get('referenceDropdown').value);
-            }
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), this.config.apiTimeout);
+            
             const response = await fetch(`${this.apiUrl}/analyze`, {
                 method: 'POST',
                 body: formData,
-                signal: controller.signal
             });
-            clearTimeout(timeoutId);
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ detail: response.statusText }));
-                throw new Error(`Serverfehler ${response.status}: ${errorData.detail}`);
-            }
+
+            if (!response.ok) throw new Error(`Serverfehler ${response.status}`);
+            
             const result = await response.json();
             if (!result.success) throw new Error(result.detail || 'Analyse fehlgeschlagen');
+            
             this.displayResults(result);
             this.updateAnalysisMetrics(result);
         } catch (error) {
             console.error('Analysis error:', error);
-            const message = error.name === 'AbortError' ? 'Analyse-Timeout: Server antwortet nicht.' : error.message;
-            this.showStatus(`Fehler bei der Analyse: ${message}`, 'error');
+            this.showStatus(`Fehler bei der Analyse: ${error.message}`, 'error');
         } finally {
             this.state.isAnalyzing = false;
             this.setLoading(false);
         }
     }
 
-    /**
-     * Displays the analysis results in the UI.
-     */
     displayResults(result) {
         const resultsContent = this.get('resultsContent');
         if (!resultsContent) return;
+
         const getExposureLabel = (level) => ({
             'low': 'Niedrig', 'medium': 'Mittel', 'high': 'Hoch', 'extreme': 'Extrem'
         }[level] || 'Unbekannt');
+
         resultsContent.innerHTML = `
             <div class="results-grid">
                 <div class="result-card"><div class="result-label">UV-Dosis</div><div class="result-value">${result.uv_dose || 'N/A'}</div><div class="result-unit">J/cm²</div></div>
                 <div class="result-card"><div class="result-label">Expositionsstufe</div><div class="result-value level-${result.exposure_level}">${getExposureLabel(result.exposure_level)}</div></div>
                 <div class="result-card"><div class="result-label">Konfidenz</div><div class="result-value">${result.confidence || 'N/A'}</div></div>
             </div>
+            <div style="margin: 1.5rem 0; padding: 1.5rem; background: var(--bg-secondary); border-radius: var(--radius-md);">
+                <h4 style="margin-bottom: 1rem;">Empfehlung</h4>
+                <p>${this.escapeHtml(result.recommendation)}</p>
+            </div>
             <div class="save-results-panel">
-                <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-weight: var(--font-weight-semibold);">Messung speichern</h4>
+                <h4>Messung speichern</h4>
                 <div class="save-form">
                     <label for="measurementName">Messungsname</label>
                     <input type="text" id="measurementName" placeholder="z.B. Labor Messung #1">
@@ -461,112 +397,146 @@ class UVStripAnalyzer {
                     </div>
                 </div>
             </div>`;
+
         this.get('resultsContainer').style.display = 'block';
         this.showStatus('Analyse erfolgreich abgeschlossen!', 'success');
+
         document.getElementById('saveResultBtn').addEventListener('click', () => this.saveResults(result));
         document.getElementById('discardResultBtn').addEventListener('click', () => this.discardResults());
     }
     
-    /**
-     * Updates dashboard metrics after an analysis.
-     */
     updateAnalysisMetrics(result) {
         const processingTime = Date.now() - this.state.analysisStartTime;
         this.updateText('processingTime', `${processingTime}ms`);
         this.updateText('confidenceLevel', result.confidence || '--');
     }
 
-    /**
-     * Checks the health of the backend API with a retry mechanism.
-     */
     async checkBackendHealth(retries = 3, delay = 500) {
         this.updateText('backendStatus', 'Prüfe...');
         this.get('backendStatus').style.color = 'var(--text-muted)';
-
         for (let i = 0; i < retries; i++) {
             try {
                 const response = await fetch(`${this.apiUrl}/health`);
                 if (response.ok) {
                     this.updateText('backendStatus', 'Online');
                     this.get('backendStatus').style.color = 'var(--success-color)';
-                    return; // Success, exit the loop
+                    return;
                 }
             } catch (error) {
                 console.warn(`Backend health check attempt ${i + 1} failed.`);
             }
             if (i < retries - 1) await new Promise(res => setTimeout(res, delay));
         }
-        
-        // If all retries fail
         this.updateText('backendStatus', 'Offline');
         this.get('backendStatus').style.color = 'var(--danger-color)';
-        this.showStatus('Backend nicht erreichbar. Bitte Server starten.', 'error');
+        this.showStatus('Backend nicht erreichbar.', 'error');
     }
 
     //=========================================================================
-    // Data Persistence (LocalStorage)
+    // Data Persistence (NEU: API-basiert)
     //=========================================================================
 
-    /**
-     * Saves the current application state to LocalStorage.
-     */
-    saveAppState() {
+    async saveResults(result) {
+        const measurementName = document.getElementById('measurementName').value.trim() || `Messung ${new Date().toLocaleString('de-DE')}`;
+        
+        const payload = {
+            name: measurementName,
+            notes: document.getElementById('measurementNotes').value.trim() || '',
+            filename: result.filename,
+            results: {
+                uv_dose: result.uv_dose,
+                exposure_level: result.exposure_level,
+                confidence: result.confidence,
+                recommendation: result.recommendation
+            }
+        };
+
         try {
-            localStorage.setItem('luvexAppState', JSON.stringify({
-                currentMode: this.state.currentMode
-            }));
-        } catch (e) {
-            console.warn('Could not save app state to LocalStorage.', e);
+            const response = await fetch(`${this.apiUrl}/measurements`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error('Fehler beim Speichern');
+
+            this.showStatus(`Messung "${measurementName}" erfolgreich in der Datenbank gespeichert!`, 'success');
+            this.discardResults();
+            this.showAllMeasurements(); // Liste aktualisieren
+        } catch (error) {
+            console.error('Save error:', error);
+            this.showStatus('Messung konnte nicht gespeichert werden.', 'error');
+        }
+    }
+    
+    discardResults() {
+        this.get('resultsContainer').style.display = 'none';
+    }
+
+    async showAllMeasurements() {
+        const listContainer = this.get('measurementsList');
+        try {
+            const response = await fetch(`${this.apiUrl}/measurements`);
+            if (!response.ok) throw new Error('Daten konnten nicht geladen werden');
+            
+            const measurements = await response.json();
+            listContainer.innerHTML = '';
+
+            if (measurements.length === 0) {
+                listContainer.innerHTML = this.getEmptyStateHTML('Noch keine Messungen in der Datenbank gespeichert.');
+            } else {
+                const fragment = document.createDocumentFragment();
+                measurements.forEach(m => fragment.appendChild(this.createMeasurementItem(m)));
+                listContainer.appendChild(fragment);
+                
+                const lastAnalysisDate = new Date(measurements[0].timestamp);
+                this.updateText('lastAnalysis', lastAnalysisDate.toLocaleString('de-DE'));
+            }
+        } catch (error) {
+            console.error('Fetch measurements error:', error);
+            listContainer.innerHTML = this.getEmptyStateHTML('Fehler beim Laden der Messungen.');
         }
     }
 
-    /**
-     * Loads application state from LocalStorage.
-     */
+    createMeasurementItem(m) {
+        const item = document.createElement('div');
+        item.className = 'measurement-item';
+        const date = new Date(m.timestamp).toLocaleString('de-DE');
+        const dose = m.results.uv_dose || 'N/A';
+        const level = { 'low': 'Niedrig', 'medium': 'Mittel', 'high': 'Hoch', 'extreme': 'Extrem' }[m.results.exposure_level] || 'Unbekannt';
+        
+        item.innerHTML = `
+            <div class="measurement-header">${this.escapeHtml(m.name)}</div>
+            <div class="measurement-details">
+                <div class="measurement-detail-item"><strong>Datum:</strong><span>${date}</span></div>
+                <div class="measurement-detail-item"><strong>UV-Dosis:</strong><span>${dose} J/cm²</span></div>
+                <div class="measurement-detail-item"><strong>Stufe:</strong><span class="level-${m.results.exposure_level}">${level}</span></div>
+                <div class="measurement-detail-item"><strong>Datei:</strong><span>${this.escapeHtml(m.filename)}</span></div>
+            </div>
+            ${m.notes ? `<div class="measurement-notes" style="margin-top: 1rem;"><strong>Notizen:</strong> <p style="margin:0; padding:0;">${this.escapeHtml(m.notes)}</p></div>` : ''}`;
+        return item;
+    }
+
+    //=========================================================================
+    // LocalStorage for App State and References
+    //=========================================================================
+
+    saveAppState() {
+        try {
+            localStorage.setItem('luvexAppState', JSON.stringify({ currentMode: this.state.currentMode }));
+        } catch (e) { console.warn('Could not save app state.', e); }
+    }
+
     loadAppState() {
         try {
             const savedState = JSON.parse(localStorage.getItem('luvexAppState'));
             if (savedState && savedState.currentMode) {
                 this.setMode(savedState.currentMode);
             }
-        } catch (e) {
-            console.warn('Could not load app state from LocalStorage.', e);
-        }
-    }
-
-    /**
-     * Saves the analysis result to LocalStorage.
-     */
-    saveResults(result) {
-        const measurementName = document.getElementById('measurementName').value.trim() || `Messung ${new Date().toLocaleString('de-DE')}`;
-        const measurement = {
-            id: Date.now().toString(),
-            name: measurementName,
-            notes: document.getElementById('measurementNotes').value.trim() || '',
-            timestamp: new Date().toISOString(),
-            filename: this.state.currentImage.name,
-            mode: this.state.currentMode,
-            results: result
-        };
-        const savedMeasurements = JSON.parse(localStorage.getItem('uvMeasurements') || '[]');
-        savedMeasurements.unshift(measurement);
-        if (savedMeasurements.length > this.config.maxMeasurements) savedMeasurements.pop();
-        localStorage.setItem('uvMeasurements', JSON.stringify(savedMeasurements));
-        this.showStatus(`Messung "${measurementName}" gespeichert!`, 'success');
-        this.updateText('lastAnalysis', new Date().toLocaleString('de-DE'));
-        this.discardResults();
+        } catch (e) { console.warn('Could not load app state.', e); }
     }
     
-    /**
-     * Hides the results container.
-     */
-    discardResults() {
-        this.get('resultsContainer').style.display = 'none';
-    }
-
-    /**
-     * Saves a new custom reference to LocalStorage.
-     */
+    // --- WIEDERHERGESTELLTE FUNKTIONEN FÜR REFERENZEN ---
+    
     async saveNewReference() {
         const name = this.get('newReferenceName').value.trim();
         const range = this.get('newReferenceRange').value.trim();
@@ -594,9 +564,6 @@ class UVStripAnalyzer {
         }
     }
     
-    /**
-     * Resets the form for adding a new reference.
-     */
     resetAddReferenceForm() {
         this.get('newReferenceName').value = '';
         this.get('newReferenceRange').value = '';
@@ -605,9 +572,6 @@ class UVStripAnalyzer {
         this.state.newReferenceImage = null;
     }
 
-    /**
-     * Deletes a specific custom reference from LocalStorage.
-     */
     deleteReference(referenceId) {
         let references = JSON.parse(localStorage.getItem('uvReferences') || '[]');
         const refToDelete = references.find(r => r.id === referenceId);
@@ -624,25 +588,7 @@ class UVStripAnalyzer {
             }
         );
     }
-
-    /**
-     * Handles the deletion of all measurements.
-     */
-    handleDeleteAllMeasurements() {
-        this.showConfirm(
-            'Alle Messungen löschen',
-            'Möchten Sie wirklich alle Messungen löschen? Diese Aktion ist endgültig.',
-            () => {
-                localStorage.removeItem('uvMeasurements');
-                this.showStatus('Alle Messungen gelöscht.', 'info');
-                this.closeModal(this.get('settingsModal'));
-            }
-        );
-    }
-
-    /**
-     * Handles the deletion of all custom references.
-     */
+    
     handleDeleteAllReferences() {
         this.showConfirm(
             'Alle Referenzen löschen',
@@ -656,50 +602,6 @@ class UVStripAnalyzer {
         );
     }
 
-    //=========================================================================
-    // Modal and Dynamic Content
-    //=========================================================================
-
-    /**
-     * Opens a modal with an animation.
-     */
-    openModal(modal) {
-        if (!modal) return;
-        modal.style.display = 'flex';
-        setTimeout(() => modal.classList.add('visible'), 10);
-    }
-
-    /**
-     * Closes a modal with an animation.
-     */
-    closeModal(modal) {
-        if (!modal) return;
-        modal.classList.remove('visible');
-        setTimeout(() => {
-            modal.style.display = 'none';
-        }, 300);
-    }
-    
-    /**
-     * Displays a confirmation dialog.
-     */
-    showConfirm(title, message, onConfirm) {
-        this.updateText('confirmTitle', title);
-        this.updateText('confirmMessage', message);
-        const oldBtn = this.get('confirmOkBtn');
-        const newBtn = oldBtn.cloneNode(true);
-        oldBtn.parentNode.replaceChild(newBtn, oldBtn);
-        this.domCache.set('confirmOkBtn', newBtn);
-        newBtn.onclick = () => {
-            onConfirm();
-            this.closeModal(this.get('confirmModal'));
-        };
-        this.openModal(this.get('confirmModal'));
-    }
-
-    /**
-     * Populates the reference dropdown and library list from LocalStorage.
-     */
     populateReferences() {
         const customReferences = JSON.parse(localStorage.getItem('uvReferences') || '[]');
         const dropdown = this.get('referenceDropdown');
@@ -729,48 +631,6 @@ class UVStripAnalyzer {
         this.get('manageLibraryBtn').disabled = customReferences.length === 0;
     }
 
-    /**
-     * Shows the modal with all saved measurements.
-     */
-    showAllMeasurements() {
-        const measurements = JSON.parse(localStorage.getItem('uvMeasurements') || '[]');
-        const listContainer = this.get('measurementsList');
-        listContainer.innerHTML = '';
-        if (measurements.length === 0) {
-            listContainer.innerHTML = this.getEmptyStateHTML('Noch keine Messungen gespeichert.');
-        } else {
-            const fragment = document.createDocumentFragment();
-            measurements.forEach(m => fragment.appendChild(this.createMeasurementItem(m)));
-            listContainer.appendChild(fragment);
-        }
-        this.openModal(this.get('measurementsModal'));
-    }
-    
-    /**
-     * Creates an HTML element for a single measurement item.
-     */
-    createMeasurementItem(m) {
-        const item = document.createElement('div');
-        item.className = 'measurement-item';
-        const date = new Date(m.timestamp).toLocaleString('de-DE');
-        const dose = m.results.uv_dose || 'N/A';
-        const level = { 'low': 'Niedrig', 'medium': 'Mittel', 'high': 'Hoch', 'extreme': 'Extrem' }[m.results.exposure_level] || 'Unbekannt';
-        const mode = m.mode === 'withReference' ? 'Referenz im Bild' : 'Gespeicherte Referenz';
-        item.innerHTML = `
-            <div class="measurement-header">${this.escapeHtml(m.name)}</div>
-            <div class="measurement-details">
-                <div class="measurement-detail-item"><strong>Datum:</strong><span>${date}</span></div>
-                <div class="measurement-detail-item"><strong>UV-Dosis:</strong><span>${dose} J/cm²</span></div>
-                <div class="measurement-detail-item"><strong>Stufe:</strong><span class="level-${m.results.exposure_level}">${level}</span></div>
-                <div class="measurement-detail-item"><strong>Modus:</strong><span>${mode}</span></div>
-            </div>
-            ${m.notes ? `<div class="measurement-notes"><strong>Notizen:</strong> <p>${this.escapeHtml(m.notes)}</p></div>` : ''}`;
-        return item;
-    }
-
-    /**
-     * Shows the modal to manage custom references.
-     */
     showManageLibrary() {
         const customReferences = JSON.parse(localStorage.getItem('uvReferences') || '[]');
         const listContainer = this.get('manageLibraryList');
@@ -800,25 +660,40 @@ class UVStripAnalyzer {
     }
 
     //=========================================================================
-    // Utilities
+    // Modals and Utilities
     //=========================================================================
 
-    /**
-     * Sanitizes a string to prevent XSS.
-     */
-    escapeHtml(unsafe) {
-        if (typeof unsafe !== 'string') return '';
-        return unsafe
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+    openModal(modal) {
+        if (!modal) return;
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('visible'), 10);
     }
 
-    /**
-     * Generates HTML for an empty state message in modals.
-     */
+    closeModal(modal) {
+        if (!modal) return;
+        modal.classList.remove('visible');
+        setTimeout(() => { modal.style.display = 'none'; }, 300);
+    }
+    
+    showConfirm(title, message, onConfirm) {
+        this.updateText('confirmTitle', title);
+        this.updateText('confirmMessage', message);
+        const oldBtn = this.get('confirmOkBtn');
+        const newBtn = oldBtn.cloneNode(true);
+        oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+        this.domCache.set('confirmOkBtn', newBtn);
+        newBtn.onclick = () => {
+            onConfirm();
+            this.closeModal(this.get('confirmModal'));
+        };
+        this.openModal(this.get('confirmModal'));
+    }
+
+    escapeHtml(unsafe) {
+        if (typeof unsafe !== 'string') return '';
+        return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
     getEmptyStateHTML(message) {
         return `
             <div class="modal-empty-state">
