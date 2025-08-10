@@ -253,6 +253,43 @@ async def get_all_measurements(db: Session = Depends(get_db)):
         }
     } for m in measurements]
 
+
+
+
+# Zu main.py hinzufügen (nach den anderen /measurements Endpunkten):
+
+@app.delete("/measurements/{measurement_id}", summary="Löscht eine spezifische Messung")
+async def delete_measurement(measurement_id: int, db: Session = Depends(get_db)):
+    try:
+        measurement = db.query(Measurement).filter(Measurement.id == measurement_id).first()
+        if not measurement:
+            raise HTTPException(status_code=404, detail="Messung nicht gefunden")
+        
+        measurement_name = measurement.name
+        db.delete(measurement)
+        db.commit()
+        
+        logger.info(f"Messung '{measurement_name}' (ID: {measurement_id}) gelöscht.")
+        return {"success": True, "message": f"Messung '{measurement_name}' gelöscht"}
+        
+    except Exception as e:
+        logger.error(f"Fehler beim Löschen der Messung {measurement_id}: {e}")
+        raise HTTPException(status_code=500, detail="Fehler beim Löschen der Messung")
+
+@app.delete("/measurements", summary="Löscht alle Messungen (VORSICHT!)")
+async def delete_all_measurements(db: Session = Depends(get_db)):
+    try:
+        count = db.query(Measurement).count()
+        db.query(Measurement).delete()
+        db.commit()
+        
+        logger.info(f"Alle {count} Messungen gelöscht.")
+        return {"success": True, "message": f"{count} Messungen gelöscht", "deleted_count": count}
+        
+    except Exception as e:
+        logger.error(f"Fehler beim Löschen aller Messungen: {e}")
+        raise HTTPException(status_code=500, detail="Fehler beim Löschen aller Messungen")
+
 # Dieser Teil ist wichtig, damit das Skript gestartet werden kann.
 if __name__ == "__main__":
     logger.info("🚀 Starte LUVEX UV Strip Analyzer Backend v2...")
@@ -262,3 +299,5 @@ if __name__ == "__main__":
         port=8001,
         log_level="info"
     )
+
+

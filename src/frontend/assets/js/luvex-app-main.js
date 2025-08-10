@@ -92,8 +92,7 @@ class UVStripAnalyzer {
         });
         this.domCache.set('modeToggleBtns', document.querySelectorAll('.mode-toggle-btn'));
         
-        // Deaktivieren der Lösch-Buttons für Messungen, da DB-Löschen noch nicht implementiert ist.
-        this.get('deleteAllMeasurementsBtn').disabled = true;
+    
     }
 
     get(id) {
@@ -137,6 +136,7 @@ class UVStripAnalyzer {
         this.addClickListener('saveReferenceBtn', () => this.saveNewReference());
         this.addClickListener('cancelReferenceBtn', () => this.closeModal(this.get('addReferenceModal')));
         this.addClickListener('deleteAllReferencesBtn', () => this.handleDeleteAllReferences()); // WIEDERHERGESTELLT
+        this.addClickListener('deleteAllMeasurementsBtn', () => this.handleDeleteAllMeasurements());
         this.get('manageLibraryList')?.addEventListener('click', e => {
             const deleteBtn = e.target.closest('.btn-delete');
             if (deleteBtn) this.deleteReference(deleteBtn.dataset.id);
@@ -296,6 +296,51 @@ class UVStripAnalyzer {
             this.showStatus(`Fehler beim Lesen der Referenzdatei: ${error.message}`, 'error');
         }
     }
+
+    async handleDeleteAllMeasurements() {
+    this.showConfirm(
+        'Alle Messungen löschen',
+        'Möchten Sie wirklich alle Messungen aus der Datenbank löschen? Diese Aktion kann nicht rückgängig gemacht werden!',
+        async () => {
+            try {
+                const response = await fetch(`${this.apiUrl}/measurements`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error('Löschen fehlgeschlagen');
+                
+                const result = await response.json();
+                this.showStatus(`${result.deleted_count} Messungen aus der Datenbank gelöscht.`, 'success');
+                this.showAllMeasurements(); // Liste aktualisieren
+                this.updateText('lastAnalysis', 'Nie');
+                this.closeModal(this.get('settingsModal'));
+            } catch (error) {
+                console.error('Delete all measurements error:', error);
+                this.showStatus('Fehler beim Löschen der Messungen.', 'error');
+            }
+        }
+    );
+}
+
+async deleteSingleMeasurement(measurementId, measurementName) {
+    this.showConfirm(
+        'Messung löschen',
+        `Möchten Sie die Messung "${measurementName}" wirklich löschen?`,
+        async () => {
+            try {
+                const response = await fetch(`${this.apiUrl}/measurements/${measurementId}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error('Löschen fehlgeschlagen');
+                
+                this.showStatus(`Messung "${measurementName}" gelöscht.`, 'success');
+                this.showAllMeasurements(); // Liste aktualisieren
+            } catch (error) {
+                console.error('Delete measurement error:', error);
+                this.showStatus('Fehler beim Löschen der Messung.', 'error');
+            }
+        }
+    );
+}
 
     validateFile(file, maxSizeMB) {
         if (!file) return false;
@@ -497,24 +542,42 @@ class UVStripAnalyzer {
         }
     }
 
-    createMeasurementItem(m) {
-        const item = document.createElement('div');
-        item.className = 'measurement-item';
-        const date = new Date(m.timestamp).toLocaleString('de-DE');
-        const dose = m.results.uv_dose || 'N/A';
-        const level = { 'low': 'Niedrig', 'medium': 'Mittel', 'high': 'Hoch', 'extreme': 'Extrem' }[m.results.exposure_level] || 'Unbekannt';
-        
-        item.innerHTML = `
+
+createMeasurementItem(m) {
+    const item = document.createElement('div');
+    item.className = 'measurement-item';
+    const date = new Date(m.timestamp).toLocaleString('de-DE');
+    const dose = m.results.uv_dose || 'N/A';
+    const level = { 'low': 'Niedrig', 'medium': 'Mittel', 'high': 'Hoch', 'extreme': 'Extrem' }[m.results.exposure_level] || 'Unbekannt';
+    
+    item.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
             <div class="measurement-header">${this.escapeHtml(m.name)}</div>
-            <div class="measurement-details">
-                <div class="measurement-detail-item"><strong>Datum:</strong><span>${date}</span></div>
-                <div class="measurement-detail-item"><strong>UV-Dosis:</strong><span>${dose} J/cm²</span></div>
-                <div class="measurement-detail-item"><strong>Stufe:</strong><span class="level-${m.results.exposure_level}">${level}</span></div>
-                <div class="measurement-detail-item"><strong>Datei:</strong><span>${this.escapeHtml(m.filename)}</span></div>
-            </div>
-            ${m.notes ? `<div class="measurement-notes" style="margin-top: 1rem;"><strong>Notizen:</strong> <p style="margin:0; padding:0;">${this.escapeHtml(m.notes)}</p></div>` : ''}`;
-        return item;
-    }
+            <button class="btn-icon btn-delete" data-id="${m.id}" data-name="${this.escapeHtml(m.name)}" 
+                    aria-label="Messung ${this.escapeHtml(m.name)} löschen"
+                    style="color: var(--danger-color); padding: 0.5rem; border: none; background: none; cursor: pointer; border-radius: var(--radius-sm);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </button>
+        </div>
+        <div class="measurement-details">
+            <div class="measurement-detail-item"><strong>Datum:</strong><span>${date}</span></div>
+            <div class="measurement-detail-item"><strong>UV-Dosis:</strong><span>${dose} J/cm²</span></div>
+            <div class="measurement-detail-item"><strong>Stufe:</strong><span class="level-${m.results.exposure_level}">${level}</span></div>
+            <div class="measurement-detail-item"><strong>Datei:</strong><span>${this.escapeHtml(m.filename)}</span></div>
+        </div>
+        ${m.notes ? `<div class="measurement-notes" style="margin-top: 1rem;"><strong>Notizen:</strong> <p style="margin:0; padding:0;">${this.escapeHtml(m.notes)}</p></div>` : ''}`;
+    
+    // Event Listener für Lösch-Button
+    const deleteBtn = item.querySelector('.btn-delete');
+    deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.deleteSingleMeasurement(m.id, m.name);
+    });
+    
+    return item;
+}
 
     //=========================================================================
     // LocalStorage for App State and References
