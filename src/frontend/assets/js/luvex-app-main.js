@@ -822,10 +822,14 @@ class UVStripAnalyzer {
         } catch (error) {
             console.log('WordPress auth not available:', error.message);
         }
-        return false;
+            // NEU: Redirect wenn kein Auth verfügbar
+            this.redirectToWebsite();
+            return false;
     }
 
-
+    redirectToWebsite() {
+    window.location.href = 'https://www.luvex.tech/login/?redirect=analyzer';
+    }
 
 
 
