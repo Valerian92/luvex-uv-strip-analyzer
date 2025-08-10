@@ -819,13 +819,18 @@ class UVStripAnalyzer {
                     return true;
                 }
             }
-        } catch (error) {
+       } catch (error) {
             console.log('WordPress auth not available:', error.message);
-        }
+            
             // NEU: Redirect wenn kein Auth verfügbar
             //this.redirectToWebsite();
             console.log("DEBUG: Auth check failed, but redirect disabled");
             return true; // TEMPORÄR: Tue so als ob Auth funktioniert
+        }
+
+        // Fallback: Wenn Token-Response nicht ok war
+        console.log("DEBUG: No valid token received, but redirect disabled");
+        return true; // TEMPORÄR: Tue so als ob Auth funktioniert
     }
 
     redirectToWebsite() {
