@@ -834,8 +834,10 @@ class UVStripAnalyzer {
     }
 
     redirectToWebsite() {
-    window.location.href = 'https://www.luvex.tech/login/?redirect=analyzer';
+    console.log("REDIRECT DISABLED FOR DEBUGGING");
+    // window.location.href = 'https://www.luvex.tech/login/?redirect=analyzer';
     }
+    
 
 
 
