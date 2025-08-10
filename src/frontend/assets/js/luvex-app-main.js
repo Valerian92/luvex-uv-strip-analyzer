@@ -34,6 +34,13 @@ class UVStripAnalyzer {
             analysisStartTime: null,
         };
 
+        // --- Auth State ---
+        this.auth = {
+            token: null,
+            user: null,
+            isAuthenticated: false
+        };
+
         // --- Caches and Timers ---
         this.domCache = new Map();
         this.debounceTimers = new Map();
@@ -54,6 +61,8 @@ class UVStripAnalyzer {
             this.cacheDOMElements();
             this.initializeEventListeners();
             this.loadAppState();
+            await this.checkWordPressAuth();
+            this.loadAuthToken();
             await this.checkBackendHealth();
             this.populateReferences(); // WIEDERHERGESTELLT
             this.showAllMeasurements(); // NEU: Lädt Messungen aus der DB beim Start
@@ -319,28 +328,28 @@ class UVStripAnalyzer {
             }
         }
     );
-}
+    }
 
-async deleteSingleMeasurement(measurementId, measurementName) {
-    this.showConfirm(
-        'Messung löschen',
-        `Möchten Sie die Messung "${measurementName}" wirklich löschen?`,
-        async () => {
-            try {
-                const response = await fetch(`${this.apiUrl}/measurements/${measurementId}`, {
-                    method: 'DELETE'
-                });
-                if (!response.ok) throw new Error('Löschen fehlgeschlagen');
-                
-                this.showStatus(`Messung "${measurementName}" gelöscht.`, 'success');
-                this.showAllMeasurements(); // Liste aktualisieren
-            } catch (error) {
-                console.error('Delete measurement error:', error);
-                this.showStatus('Fehler beim Löschen der Messung.', 'error');
+    async deleteSingleMeasurement(measurementId, measurementName) {
+        this.showConfirm(
+            'Messung löschen',
+            `Möchten Sie die Messung "${measurementName}" wirklich löschen?`,
+            async () => {
+                try {
+                    const response = await fetch(`${this.apiUrl}/measurements/${measurementId}`, {
+                        method: 'DELETE'
+                    });
+                    if (!response.ok) throw new Error('Löschen fehlgeschlagen');
+                    
+                    this.showStatus(`Messung "${measurementName}" gelöscht.`, 'success');
+                    this.showAllMeasurements(); // Liste aktualisieren
+                } catch (error) {
+                    console.error('Delete measurement error:', error);
+                    this.showStatus('Fehler beim Löschen der Messung.', 'error');
+                }
             }
-        }
-    );
-}
+        );
+    }
 
     validateFile(file, maxSizeMB) {
         if (!file) return false;
@@ -498,10 +507,10 @@ async deleteSingleMeasurement(measurementId, measurementName) {
 
         try {
             const response = await fetch(`${this.apiUrl}/measurements`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            method: 'POST',
+            headers: this.getAuthHeaders(),
+            body: JSON.stringify(payload)
+        });
             if (!response.ok) throw new Error('Fehler beim Speichern');
 
             this.showStatus(`Messung "${measurementName}" erfolgreich in der Datenbank gespeichert!`, 'success');
@@ -520,7 +529,9 @@ async deleteSingleMeasurement(measurementId, measurementName) {
     async showAllMeasurements() {
         const listContainer = this.get('measurementsList');
         try {
-            const response = await fetch(`${this.apiUrl}/measurements`);
+            const response = await fetch(`${this.apiUrl}/measurements`, {
+            headers: this.getAuthHeaders()
+        });
             if (!response.ok) throw new Error('Daten konnten nicht geladen werden');
             
             const measurements = await response.json();
@@ -543,7 +554,7 @@ async deleteSingleMeasurement(measurementId, measurementName) {
     }
 
 
-createMeasurementItem(m) {
+    createMeasurementItem(m) {
     const item = document.createElement('div');
     item.className = 'measurement-item';
     const date = new Date(m.timestamp).toLocaleString('de-DE');
@@ -577,7 +588,7 @@ createMeasurementItem(m) {
     });
     
     return item;
-}
+    }
 
     //=========================================================================
     // LocalStorage for App State and References
@@ -764,9 +775,64 @@ createMeasurementItem(m) {
                 <p>${this.escapeHtml(message)}</p>
             </div>`;
     }
-}
+
+
+    //=========================================================================
+    // Authentication & Token Management  
+    //=========================================================================
+
+    loadAuthToken() {
+        const token = sessionStorage.getItem('luvex_uvstrip_auth_token');
+        if (token) {
+            this.auth.token = token;
+            this.auth.isAuthenticated = true;
+            console.log('Auth token loaded');
+        }
+    }
+
+    getAuthHeaders() {
+        return this.auth.token ? {
+            'Authorization': `Bearer ${this.auth.token}`,
+            'Content-Type': 'application/json'
+        } : {
+            'Content-Type': 'application/json'
+        };
+    }
+
+    async checkWordPressAuth() {
+        try {
+            // Versuche Token von WordPress zu holen
+            const response = await fetch('/wp-admin/admin-ajax.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'action=luvex_uvstrip_get_token'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.token) {
+                    sessionStorage.setItem('luvex_uvstrip_auth_token', data.token);
+                    this.auth.token = data.token;
+                    this.auth.user = data.user;
+                    this.auth.isAuthenticated = true;
+                    console.log('WordPress auth successful:', data.user);
+                    return true;
+                }
+            }
+        } catch (error) {
+            console.log('WordPress auth not available:', error.message);
+        }
+        return false;
+    }
+
+
+
+
+
+} // <-- Das schließt die UVStripAnalyzer Klasse
 
 // Initialize the application once the DOM is fully loaded.
 document.addEventListener('DOMContentLoaded', () => {
     window.uvAnalyzer = new UVStripAnalyzer();
 });
+
