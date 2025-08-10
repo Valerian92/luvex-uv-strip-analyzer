@@ -823,7 +823,7 @@ class UVStripAnalyzer {
             console.log('WordPress auth not available:', error.message);
         }
             // NEU: Redirect wenn kein Auth verfügbar
-            this.redirectToWebsite();
+            //this.redirectToWebsite();
             return false;
     }
 
