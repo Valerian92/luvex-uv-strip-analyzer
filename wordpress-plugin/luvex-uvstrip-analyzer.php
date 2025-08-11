@@ -186,37 +186,39 @@ class LuvexUVStripAnalyzer {
         add_option('luvex_uvstrip_analyzer_url', 'https://analyzer.luvex.tech');
         $this->get_jwt_secret();
     }
-}
+
+
+
+
+
+    private function add_cors_headers() {
+        $allowed_origins = [
+            'https://analyzer.luvex.tech',
+            'https://www.luvex.tech',
+            'https://luvex.tech'
+        ];
+        
+        $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+        
+        if (in_array($origin, $allowed_origins)) {
+            header("Access-Control-Allow-Origin: $origin");
+            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+            header('Access-Control-Allow-Headers: Content-Type, Authorization');
+            
+            error_log('UV Strip: CORS headers set for origin: ' . $origin);
+        } else {
+            error_log('UV Strip: Origin not allowed: ' . $origin);
+        }
+        
+        // Handle OPTIONS preflight request
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            http_response_code(200);
+            exit;
+        }
+    }
+} // ← Klassen-Ende
 
 new LuvexUVStripAnalyzer();
-
-
-private function add_cors_headers() {
-    $allowed_origins = [
-        'https://analyzer.luvex.tech',
-        'https://www.luvex.tech',
-        'https://luvex.tech'
-    ];
-    
-    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-    
-    if (in_array($origin, $allowed_origins)) {
-        header("Access-Control-Allow-Origin: $origin");
-        header('Access-Control-Allow-Credentials: true');
-        header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type, Authorization');
-        
-        error_log('UV Strip: CORS headers set for origin: ' . $origin);
-    } else {
-        error_log('UV Strip: Origin not allowed: ' . $origin);
-    }
-    
-    // Handle OPTIONS preflight request
-    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-        http_response_code(200);
-        exit;
-    }
-}
-
 
 ?>
