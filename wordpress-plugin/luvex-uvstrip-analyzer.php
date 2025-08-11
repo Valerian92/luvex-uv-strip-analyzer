@@ -110,7 +110,7 @@ class LuvexUVStripAnalyzer {
     public function ajax_get_token() {
         // TEMP: if (!wp_verify_nonce($_POST['_wpnonce'], 'luvex_uvstrip_token')) {
             // TEMP: wp_die('Security check failed');
-        
+
 
         if (!is_user_logged_in()) {
             wp_send_json_error(array('message' => 'Not logged in'));
