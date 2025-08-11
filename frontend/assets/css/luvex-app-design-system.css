@@ -112,11 +112,12 @@ body {
 
 .header-content {
     display: grid; 
-    grid-template-columns: 1fr auto 1fr; 
+    grid-template-columns: auto 1fr auto; 
     align-items: center;
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
+    gap: 3rem; /* Erhöht von 2rem */
 }
 
 .logo-section {
@@ -1244,7 +1245,13 @@ input[type="file"] {
 
 
 /* User Display Enhancement */
-.user-section { position: relative; display: flex; align-items: center; gap: 0.75rem; }
+.user-section {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: auto; /* HINZUFÜGEN - schiebt es ganz nach rechts */
+}
 .user-info { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem 0.75rem; border-radius: var(--radius-md); transition: var(--transition-normal); user-select: none; }
 .user-info:hover { background: rgba(109, 213, 237, 0.1); }
 .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--luvex-bright-cyan), var(--luvex-light-cyan)); display: flex; align-items: center; justify-content: center; font-weight: 600; color: var(--luvex-dark-blue); font-size: 0.875rem; border: 2px solid rgba(109, 213, 237, 0.3); transition: var(--transition-normal); }

@@ -516,21 +516,22 @@ class UVStripAnalyzer {
     }
 
     async checkBackendHealth(retries = 3, delay = 500) {
-        this.updateText('backendStatus', 'Prüfe...');
-        this.get('backendStatus').style.color = 'var(--text-muted)';
-        for (let i = 0; i < retries; i++) {
-            try {
-                const response = await fetch(`${this.apiUrl}/health`);
-                if (response.ok) {
-                    this.updateText('backendStatus', 'Online');
-                    this.get('backendStatus').style.color = 'var(--success-color)';
-                    return;
-                }
-            } catch (error) {
-                console.warn(`Backend health check attempt ${i + 1} failed.`);
+    // Dashboard entfernt - Health Check vereinfacht
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(`${this.apiUrl}/health`);
+            if (response.ok) {
+                console.log('✅ Backend Online');
+                return;
             }
-            if (i < retries - 1) await new Promise(res => setTimeout(res, delay));
+        } catch (error) {
+            console.warn(`Backend health check attempt ${i + 1} failed.`);
         }
+        if (i < retries - 1) await new Promise(res => setTimeout(res, delay));
+    }
+    console.error('❌ Backend Offline');
+    this.showStatus('Backend nicht erreichbar.', 'error');
+    }
         this.updateText('backendStatus', 'Offline');
         this.get('backendStatus').style.color = 'var(--danger-color)';
         this.showStatus('Backend nicht erreichbar.', 'error');
