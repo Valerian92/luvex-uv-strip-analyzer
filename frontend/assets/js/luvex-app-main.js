@@ -73,9 +73,9 @@ class UVStripAnalyzer {
         console.error('Initialization failed:', error);
         this.showStatus('Fehler beim Initialisieren der Anwendung.', 'error');
     }
-}
+    }
 
-/**
+    /**
  * Professional authentication initialization with proper async flow
  */
     async initializeAuthentication() {
@@ -515,7 +515,7 @@ class UVStripAnalyzer {
         this.updateText('confidenceLevel', result.confidence || '--');
     }
 
-    async checkBackendHealth(retries = 3, delay = 500) {
+   async checkBackendHealth(retries = 3, delay = 500) {
     // Dashboard entfernt - Health Check vereinfacht
     for (let i = 0; i < retries; i++) {
         try {
@@ -531,10 +531,6 @@ class UVStripAnalyzer {
     }
     console.error('❌ Backend Offline');
     this.showStatus('Backend nicht erreichbar.', 'error');
-    }
-        this.updateText('backendStatus', 'Offline');
-        this.get('backendStatus').style.color = 'var(--danger-color)';
-        this.showStatus('Backend nicht erreichbar.', 'error');
     }
 
     //=========================================================================
@@ -913,98 +909,98 @@ class UVStripAnalyzer {
         return wordPressDomains.includes(hostname);
     }
 
-/**
- * WordPress auth check - SINGLE VERSION
- */
-    async checkWordPressAuth() {
-    console.log('🔐 checkWordPressAuth() called');
-    console.log('🔐 isWordPressDomain():', this.isWordPressDomain());
-    
-    // Early exit if not on WordPress domain
-    if (!this.isWordPressDomain()) {
-        console.log('Not on WordPress domain, skipping WordPress auth');
+    /**
+     * WordPress auth check - SINGLE VERSION
+     */
+        async checkWordPressAuth() {
+        console.log('🔐 checkWordPressAuth() called');
+        console.log('🔐 isWordPressDomain():', this.isWordPressDomain());
+        
+        // Early exit if not on WordPress domain
+        if (!this.isWordPressDomain()) {
+            console.log('Not on WordPress domain, skipping WordPress auth');
+            return false;
+        }
+
+        // DEFINE wpDomain based on current setup
+        const wpDomain = 'https://www.luvex.tech';  // ← HINZUGEFÜGT!
+        
+        console.log('🔐 Making WordPress auth request...');
+        try {
+            console.log(`🔐 Trying WordPress auth on: ${wpDomain}`);
+            
+            const response = await fetch(`${wpDomain}/wp-admin/admin-ajax.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                credentials: 'include',  // ← Wichtig für Cross-Domain Cookies
+                body: 'action=luvex_uvstrip_get_token'
+            });
+            
+            console.log('🔐 WordPress response status:', response.status);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('🔐 WordPress response data:', data);
+                
+                // DETAILED DEBUG OUTPUT
+                console.log('🔐 Response success:', data.success);
+                console.log('🔐 Response data object:', data.data);
+                console.log('🔐 Response message:', data.data?.message);
+                
+                if (data.success && data.data?.token) {
+                    sessionStorage.setItem('luvex_uvstrip_auth_token', data.data.token);
+                    this.auth.token = data.data.token;
+                    this.auth.user = data.data.user;
+                    this.auth.isAuthenticated = true;
+                    console.log('✅ WordPress auth successful:', data.data.user);
+                    return true;
+                } else {
+                    console.log('🔐 WordPress auth failed - reason:', data.data?.message || 'Unknown error');
+                }
+            }
+        } catch (error) {
+            console.log(`❌ WordPress auth failed:`, error.message);
+        }
+        
+        console.log('🔐 WordPress auth not available');
         return false;
     }
 
-    // DEFINE wpDomain based on current setup
-    const wpDomain = 'https://www.luvex.tech';  // ← HINZUGEFÜGT!
-    
-    console.log('🔐 Making WordPress auth request...');
-    try {
-        console.log(`🔐 Trying WordPress auth on: ${wpDomain}`);
+    getAuthHeaders() {
+        return this.auth.token ? {
+            'Authorization': `Bearer ${this.auth.token}`,
+            'Content-Type': 'application/json'
+        } : {
+            'Content-Type': 'application/json'
+        };
+    }
+
+    redirectToWebsite() {
+        console.log("REDIRECT DISABLED FOR DEBUGGING");
+        // window.location.href = 'https://www.luvex.tech/login/?redirect=analyzer';
+    }
         
-        const response = await fetch(`${wpDomain}/wp-admin/admin-ajax.php`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            credentials: 'include',  // ← Wichtig für Cross-Domain Cookies
-            body: 'action=luvex_uvstrip_get_token'
-        });
-        
-        console.log('🔐 WordPress response status:', response.status);
-        
-        if (response.ok) {
-            const data = await response.json();
-            console.log('🔐 WordPress response data:', data);
-            
-            // DETAILED DEBUG OUTPUT
-            console.log('🔐 Response success:', data.success);
-            console.log('🔐 Response data object:', data.data);
-            console.log('🔐 Response message:', data.data?.message);
-            
-            if (data.success && data.data?.token) {
-                sessionStorage.setItem('luvex_uvstrip_auth_token', data.data.token);
-                this.auth.token = data.data.token;
-                this.auth.user = data.data.user;
-                this.auth.isAuthenticated = true;
-                console.log('✅ WordPress auth successful:', data.data.user);
-                return true;
-            } else {
-                console.log('🔐 WordPress auth failed - reason:', data.data?.message || 'Unknown error');
-            }
+    // User Display Functions
+    updateUserDisplay() {
+        if (this.auth.user) {
+            const firstName = this.auth.user.first_name || this.auth.user.name?.split(' ')[0] || 'User';
+            const initials = this.getUserInitials(this.auth.user);
+            this.updateText('userName', firstName);
+            this.updateText('userAvatar', initials);
+            this.updateText('dropdownAvatar', initials);
+            this.updateText('dropdownUserName', this.auth.user.name || firstName);
+            this.updateText('dropdownUserEmail', this.auth.user.email || 'user@luvex.tech');
         }
-    } catch (error) {
-        console.log(`❌ WordPress auth failed:`, error.message);
     }
-    
-    console.log('🔐 WordPress auth not available');
-    return false;
-}
 
-getAuthHeaders() {
-    return this.auth.token ? {
-        'Authorization': `Bearer ${this.auth.token}`,
-        'Content-Type': 'application/json'
-    } : {
-        'Content-Type': 'application/json'
-    };
-}
-
-redirectToWebsite() {
-    console.log("REDIRECT DISABLED FOR DEBUGGING");
-    // window.location.href = 'https://www.luvex.tech/login/?redirect=analyzer';
-}
-    
-// User Display Functions
-updateUserDisplay() {
-    if (this.auth.user) {
-        const firstName = this.auth.user.first_name || this.auth.user.name?.split(' ')[0] || 'User';
-        const initials = this.getUserInitials(this.auth.user);
-        this.updateText('userName', firstName);
-        this.updateText('userAvatar', initials);
-        this.updateText('dropdownAvatar', initials);
-        this.updateText('dropdownUserName', this.auth.user.name || firstName);
-        this.updateText('dropdownUserEmail', this.auth.user.email || 'user@luvex.tech');
+    getUserInitials(user) {
+        if (user.first_name && user.last_name) return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
+        return user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?';
     }
-}
 
-getUserInitials(user) {
-    if (user.first_name && user.last_name) return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
-    return user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?';
-}
-
-// Global functions for dropdown
-toggleUserDropdown() { this.get('userDropdown')?.classList.toggle('visible'); }
-logout() { sessionStorage.removeItem('luvex_uvstrip_auth_token'); window.location.href = 'https://www.luvex.tech/login/'; }
+    // Global functions for dropdown
+    toggleUserDropdown() { this.get('userDropdown')?.classList.toggle('visible'); }
+    logout() { sessionStorage.removeItem('luvex_uvstrip_auth_token'); window.location.href = 'https://www.luvex.tech/login/'; }
 
 
 } // <-- Das schließt die UVStripAnalyzer Klasse
