@@ -996,18 +996,43 @@ class UVStripAnalyzer {
         // window.location.href = 'https://www.luvex.tech/login/?redirect=analyzer';
     }
         
-    // User Display Functions
-    updateUserDisplay() {
-        if (this.auth.user) {
-            const firstName = this.auth.user.first_name || this.auth.user.name?.split(' ')[0] || 'User';
-            const initials = this.getUserInitials(this.auth.user);
-            this.updateText('userName', firstName);
-            this.updateText('userAvatar', initials);
-            this.updateText('dropdownAvatar', initials);
-            this.updateText('dropdownUserName', this.auth.user.name || firstName);
-            this.updateText('dropdownUserEmail', this.auth.user.email || 'user@luvex.tech');
+        // User Display Functions
+        updateUserDisplay() {
+            console.log('🎯 updateUserDisplay() called');
+            console.log('🎯 this.auth.user:', this.auth.user);
+            
+            if (this.auth.user) {
+                const firstName = this.auth.user.first_name || this.auth.user.name?.split(' ')[0] || 'User';
+                const initials = this.getUserInitials(this.auth.user);
+                
+                console.log('🎯 firstName:', firstName);
+                console.log('🎯 initials:', initials);
+                console.log('🎯 email:', this.auth.user.email);
+                
+                // Debug: Schaue ob Elemente existieren
+                const userNameEl = document.getElementById('userName');
+                const userAvatarEl = document.getElementById('userAvatar');
+                const dropdownNameEl = document.getElementById('dropdownUserName');
+                const dropdownEmailEl = document.getElementById('dropdownUserEmail');
+                
+                console.log('🎯 DOM Elements found:', {
+                    userName: !!userNameEl,
+                    userAvatar: !!userAvatarEl,
+                    dropdownName: !!dropdownNameEl,
+                    dropdownEmail: !!dropdownEmailEl
+                });
+                
+                this.updateText('userName', firstName);
+                this.updateText('userAvatar', initials);
+                this.updateText('dropdownAvatar', initials);
+                this.updateText('dropdownUserName', this.auth.user.display_name || firstName);
+                this.updateText('dropdownUserEmail', this.auth.user.email || 'user@luvex.tech');
+                
+                console.log('🎯 updateUserDisplay() completed');
+            } else {
+                console.log('🎯 No user data available');
+            }
         }
-    }
 
     getUserInitials(user) {
         if (user.first_name && user.last_name) return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
