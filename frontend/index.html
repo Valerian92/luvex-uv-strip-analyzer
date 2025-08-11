@@ -238,15 +238,41 @@
         </div>
     </div>
 
-        <script>
-        function toggleUserDropdown() { window.uvAnalyzer?.toggleUserDropdown(); }
-        function logout() { window.uvAnalyzer?.logout(); }
-        function openModal(modal) { window.uvAnalyzer?.openModal(modal); }
-        document.addEventListener('click', e => { 
-            if (!e.target.closest('.user-section')) 
-                document.getElementById('userDropdown')?.classList.remove('visible'); 
-        });
-        </script>
-        <script src="assets/js/luvex-app-main.js"></script> <!-- defer entfernt -->
+    <script src="assets/js/luvex-app-main.js" defer></script>
+    <script>
+    // Simple dropdown toggle - funktioniert sofort
+    function toggleUserDropdown() {
+        console.log('toggleUserDropdown called'); // Debug
+        const dropdown = document.getElementById('userDropdown');
+        if (dropdown) {
+            dropdown.classList.toggle('visible');
+            console.log('Dropdown toggled, visible class:', dropdown.classList.contains('visible'));
+        } else {
+            console.error('Dropdown not found');
+        }
+    }
+
+    function logout() {
+        sessionStorage.removeItem('luvex_uvstrip_auth_token');
+        window.location.href = 'https://www.luvex.tech/login/';
+    }
+
+    function openModal(modal) {
+        if (modal) {
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('visible'), 10);
+        }
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const userSection = document.querySelector('.user-section');
+        const dropdown = document.getElementById('userDropdown');
+        
+        if (userSection && !userSection.contains(event.target)) {
+            dropdown?.classList.remove('visible');
+        }
+    });
+    </script>
 </body>
 </html>
