@@ -95,7 +95,12 @@ class LuvexUVStripAnalyzer {
                 if (data.success && data.data && data.data.token) {    
                     sessionStorage.setItem('luvex_uvstrip_auth_token', data.data.token);   
                     document.getElementById('<?php echo $container_id; ?>').innerHTML =
-                        '<iframe src="<?php echo esc_js($analyzer_url); ?>" style="width:100%; height:800px; border:none;"></iframe>';
+                        '<div style="text-align:center; padding:20px;">' +
+                        '<button onclick="window.open(\'<?php echo esc_js($analyzer_url); ?>\', \'_blank\')" ' +
+                        'style="background:#007cba; color:white; padding:15px 30px; border:none; border-radius:5px; font-size:16px; cursor:pointer; width:100%;">' +
+                        '🔬 UV Strip Analyzer öffnen' +
+                        '</button>' +
+                        '</div>';
                 } else {
                     document.getElementById('<?php echo $container_id; ?>').innerHTML =
                         '<div style="padding:20px; color:red;">Authentifizierung fehlgeschlagen</div>';
