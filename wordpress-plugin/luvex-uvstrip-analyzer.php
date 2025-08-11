@@ -114,22 +114,34 @@ class LuvexUVStripAnalyzer {
         }
 
 
-    public function ajax_get_token() {
-        // TEMP: if (!wp_verify_nonce($_POST['_wpnonce'], 'luvex_uvstrip_token')) {
-            // TEMP: wp_die('Security check failed');
+            public function ajax_get_token() {
+            // CORS Headers hinzufügen
+            $this->add_cors_headers();
+            
+            // Debug Logging
+            error_log('UV Strip Token Request from: ' . ($_SERVER['HTTP_ORIGIN'] ?? 'no-origin'));
+            error_log('User logged in: ' . (is_user_logged_in() ? 'Yes' : 'No'));
+            
+            if (!is_user_logged_in()) {
+                error_log('UV Strip: User not logged in');
+                wp_send_json_error(array('message' => 'Not logged in'));
+            }
 
-
-        if (!is_user_logged_in()) {
-            wp_send_json_error(array('message' => 'Not logged in'));
+            $token = $this->generate_jwt_token();
+            if ($token) {
+                error_log('UV Strip: Token generated successfully');
+                wp_send_json_success(array(
+                    'token' => $token,
+                    'user' => array(
+                        'id' => get_current_user_id(),
+                        'display_name' => wp_get_current_user()->display_name
+                    )
+                ));
+            } else {
+                error_log('UV Strip: Token generation failed');
+                wp_send_json_error(array('message' => 'Token generation failed'));
+            }
         }
-
-        $token = $this->generate_jwt_token();
-        if ($token) {
-            wp_send_json_success(array('token' => $token));
-        } else {
-            wp_send_json_error(array('message' => 'Token generation failed'));
-        }
-    }
 
     public function ajax_get_token_denied() {
         wp_send_json_error(array('message' => 'Access denied'));
@@ -177,4 +189,34 @@ class LuvexUVStripAnalyzer {
 }
 
 new LuvexUVStripAnalyzer();
+
+
+private function add_cors_headers() {
+    $allowed_origins = [
+        'https://analyzer.luvex.tech',
+        'https://www.luvex.tech',
+        'https://luvex.tech'
+    ];
+    
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    
+    if (in_array($origin, $allowed_origins)) {
+        header("Access-Control-Allow-Origin: $origin");
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type, Authorization');
+        
+        error_log('UV Strip: CORS headers set for origin: ' . $origin);
+    } else {
+        error_log('UV Strip: Origin not allowed: ' . $origin);
+    }
+    
+    // Handle OPTIONS preflight request
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        http_response_code(200);
+        exit;
+    }
+}
+
+
 ?>
