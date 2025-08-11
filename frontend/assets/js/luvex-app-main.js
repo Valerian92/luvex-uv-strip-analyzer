@@ -127,31 +127,31 @@ class UVStripAnalyzer {
     // DOM Caching and Access
     //=========================================================================
 
-    cacheDOMElements() {
-        const ids = [
-            'modeWithReference', 'modeSavedReference', 'modeDescription', 'currentMode',
-            'uploadMode1', 'uploadMode2', 'uploadAreaCombined', 'uploadAreaStrip', 'uploadAreaReference',
-            'fileInputCombined', 'fileInputStrip', 'fileInputReference',
-            'referenceSelector', 'referenceDropdown', 'referenceList',
-            'imagePreview', 'referenceImagePreview', 'analyzeBtn', 'resetBtn',
-            'statusMessage', 'loadingSpinner',
-            'resultsContainer', 'resultsContent', 'processingTime', 'confidenceLevel',
-            'backendStatus', 'lastAnalysis',
-            'showAllMeasurementsBtn', 'addReferenceBtn', 'manageLibraryBtn', 'settingsBtn',
-            'measurementsModal', 'addReferenceModal', 'manageLibraryModal', 'settingsModal', 'confirmModal',
-            'measurementsList', 'manageLibraryList',
-            'closeMeasurementsModalBtn', 'closeAddReferenceModalBtn', 'closeManageLibraryModalBtn', 'closeSettingsModalBtn',
-            'saveReferenceBtn', 'cancelReferenceBtn', 'newReferenceName', 'newReferenceRange',
-            'deleteAllMeasurementsBtn', 'deleteAllReferencesBtn',
-            'confirmTitle', 'confirmMessage', 'confirmOkBtn', 'confirmCancelBtn'
-        ];
-        ids.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) this.domCache.set(id, el);
-        });
-        this.domCache.set('modeToggleBtns', document.querySelectorAll('.mode-toggle-btn'));
-        
-    
+   cacheDOMElements() {
+    const ids = [
+        'modeWithReference', 'modeSavedReference', 'modeDescription', 'currentMode',
+        'uploadMode1', 'uploadMode2', 'uploadAreaCombined', 'uploadAreaStrip', 'uploadAreaReference',
+        'fileInputCombined', 'fileInputStrip', 'fileInputReference',
+        'referenceSelector', 'referenceDropdown', 'referenceList',
+        'imagePreview', 'referenceImagePreview', 'analyzeBtn', 'resetBtn',
+        'statusMessage', 'loadingSpinner',
+        'resultsContainer', 'resultsContent', 'processingTime', 'confidenceLevel',
+        'backendStatus', 'lastAnalysis',
+        'showAllMeasurementsBtn', 'addReferenceBtn', 'manageLibraryBtn', 'settingsBtn',
+        'measurementsModal', 'addReferenceModal', 'manageLibraryModal', 'settingsModal', 'confirmModal',
+        'measurementsList', 'manageLibraryList',
+        'closeMeasurementsModalBtn', 'closeAddReferenceModalBtn', 'closeManageLibraryModalBtn', 'closeSettingsModalBtn',
+        'saveReferenceBtn', 'cancelReferenceBtn', 'newReferenceName', 'newReferenceRange',
+        'deleteAllMeasurementsBtn', 'deleteAllReferencesBtn',
+        'confirmTitle', 'confirmMessage', 'confirmOkBtn', 'confirmCancelBtn',
+        // HINZUFÜGEN:
+        'userName', 'userAvatar', 'dropdownAvatar', 'dropdownUserName', 'dropdownUserEmail'
+    ];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) this.domCache.set(id, el);
+    });
+    this.domCache.set('modeToggleBtns', document.querySelectorAll('.mode-toggle-btn'));
     }
 
     get(id) {
