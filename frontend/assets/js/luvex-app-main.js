@@ -782,7 +782,21 @@ class UVStripAnalyzer {
     //=========================================================================
 
     loadAuthToken() {
-        const token = sessionStorage.getItem('luvex_uvstrip_auth_token');
+    // URL-Parameter prüfen
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get('token');
+        const tokenFromStorage = sessionStorage.getItem('luvex_uvstrip_auth_token');
+        
+        const token = tokenFromUrl || tokenFromStorage;
+        
+        if (tokenFromUrl) {
+            // Token aus URL in sessionStorage speichern
+            sessionStorage.setItem('luvex_uvstrip_auth_token', tokenFromUrl);
+            // URL-Parameter entfernen (clean URL)
+            window.history.replaceState({}, document.title, window.location.pathname);
+            console.log('Auth token loaded from URL');
+        }
+        
         if (token) {
             this.auth.token = token;
             this.auth.isAuthenticated = true;
