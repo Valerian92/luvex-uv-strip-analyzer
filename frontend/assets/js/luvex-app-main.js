@@ -944,7 +944,7 @@ async initializeAuthentication() {
             console.log('🔐 WordPress auth not available');
             return false;
         }
-        
+
 
         getAuthHeaders() {
             return this.auth.token ? {
@@ -955,44 +955,8 @@ async initializeAuthentication() {
             };
         }
 
-        async checkWordPressAuth() {
-            console.log('🔐 checkWordPressAuth() called');
-            console.log('🔐 isWordPressDomain():', this.isWordPressDomain());
-    
-    // Early exit if not on WordPress domain
-            if (!this.isWordPressDomain()) {
-                console.log('Not on WordPress domain, skipping WordPress auth');
-                return false;
-            }
 
-            console.log('🔐 Making WordPress auth request...');
-
-            try {
-                const response = await fetch('/wp-admin/admin-ajax.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    credentials: 'same-origin',
-                    body: 'action=luvex_uvstrip_get_token'
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success && data.data?.token) {
-                        sessionStorage.setItem('luvex_uvstrip_auth_token', data.data.token);
-                        this.auth.token = data.data.token;
-                        this.auth.user = data.data.user;
-                        this.auth.isAuthenticated = true;
-                        console.log('WordPress auth successful:', data.data.user);
-                        return true;
-                    }
-                }
-        } catch (error) {
-                console.log('WordPress auth not available:', error.message);
-            }
-
-            return false;
-        }
-
+        
     redirectToWebsite() {
     console.log("REDIRECT DISABLED FOR DEBUGGING");
     // window.location.href = 'https://www.luvex.tech/login/?redirect=analyzer';
