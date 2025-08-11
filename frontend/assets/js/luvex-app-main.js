@@ -144,8 +144,9 @@ class UVStripAnalyzer {
         'saveReferenceBtn', 'cancelReferenceBtn', 'newReferenceName', 'newReferenceRange',
         'deleteAllMeasurementsBtn', 'deleteAllReferencesBtn',
         'confirmTitle', 'confirmMessage', 'confirmOkBtn', 'confirmCancelBtn',
-        // HINZUFÜGEN:
-        'userName', 'userAvatar', 'dropdownAvatar', 'dropdownUserName', 'dropdownUserEmail'
+        // 🔧 FIX: USER DISPLAY ELEMENTE HINZUGEFÜGT:
+        'userName', 'userAvatar', 'userDropdown',
+        'dropdownAvatar', 'dropdownUserName', 'dropdownUserEmail'
     ];
     ids.forEach(id => {
         const el = document.getElementById(id);
