@@ -936,6 +936,11 @@ async checkWordPressAuth() {
             const data = await response.json();
             console.log('🔐 WordPress response data:', data);
             
+            // DETAILED DEBUG OUTPUT
+            console.log('🔐 Response success:', data.success);
+            console.log('🔐 Response data object:', data.data);
+            console.log('🔐 Response message:', data.data?.message);
+            
             if (data.success && data.data?.token) {
                 sessionStorage.setItem('luvex_uvstrip_auth_token', data.data.token);
                 this.auth.token = data.data.token;
@@ -943,6 +948,8 @@ async checkWordPressAuth() {
                 this.auth.isAuthenticated = true;
                 console.log('✅ WordPress auth successful:', data.data.user);
                 return true;
+            } else {
+                console.log('🔐 WordPress auth failed - reason:', data.data?.message || 'Unknown error');
             }
         }
     } catch (error) {
