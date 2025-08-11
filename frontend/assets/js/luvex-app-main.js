@@ -57,21 +57,45 @@ class UVStripAnalyzer {
      * Core initialization sequence.
      */
     async init() {
-        try {
-            this.cacheDOMElements();
-            this.initializeEventListeners();
-            this.loadAppState();
-            this.loadAuthToken();
-            await this.checkWordPressAuth();
-            await this.checkBackendHealth();
-            this.populateReferences(); // WIEDERHERGESTELLT
-            this.showAllMeasurements(); // NEU: Lädt Messungen aus der DB beim Start
-            this.showStatus('Anwendung erfolgreich initialisiert.', 'success');
-        } catch (error) {
-            console.error('Initialization failed:', error);
-            this.showStatus('Fehler beim Initialisieren der Anwendung.', 'error');
-        }
+    try {
+        this.cacheDOMElements();
+        this.initializeEventListeners();
+        this.loadAppState();
+        
+        // AUTH: Proper async flow mit besserer Logik
+        await this.initializeAuthentication();
+        
+        await this.checkBackendHealth();
+        this.populateReferences();
+        this.showAllMeasurements();
+        this.showStatus('Anwendung erfolgreich initialisiert.', 'success');
+    } catch (error) {
+        console.error('Initialization failed:', error);
+        this.showStatus('Fehler beim Initialisieren der Anwendung.', 'error');
     }
+}
+
+/**
+ * Professional authentication initialization with proper async flow
+ */
+async initializeAuthentication() {
+    console.log('🔐 Starting authentication flow...');
+    
+    // Step 1: Load token from URL or storage
+    await this.loadAuthToken();
+    
+    // Step 2: Only check WordPress if no valid token and on WordPress domain
+    if (!this.auth.isAuthenticated && this.isWordPressDomain()) {
+        console.log('🔐 No local token found, checking WordPress auth...');
+        await this.checkWordPressAuth();
+    } else if (this.auth.isAuthenticated) {
+        console.log('🔐 Authentication successful - token loaded');
+    } else {
+        console.log('🔐 Not on WordPress domain, continuing without auth');
+    }
+    
+    return this.auth.isAuthenticated;
+}
 
     //=========================================================================
     // DOM Caching and Access
@@ -780,82 +804,123 @@ class UVStripAnalyzer {
     //=========================================================================
     // Authentication & Token Management  
     //=========================================================================
-
-    loadAuthToken() {
-    console.log('🔍 loadAuthToken() started');
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const tokenFromUrl = urlParams.get('token');
-    console.log('🔍 Token from URL:', tokenFromUrl);
-    
-    const tokenFromStorage = sessionStorage.getItem('luvex_uvstrip_auth_token');
-    console.log('🔍 Token from storage:', tokenFromStorage);
-    
-    const token = tokenFromUrl || tokenFromStorage;
-    
-    if (tokenFromUrl) {
-        sessionStorage.setItem('luvex_uvstrip_auth_token', tokenFromUrl);
-        window.history.replaceState({}, document.title, window.location.pathname);
-        console.log('🔍 Auth token loaded from URL');
-    }
-    
-    if (token) {
-        this.auth.token = token;
-        this.auth.isAuthenticated = true;
-        console.log('🔍 Auth token loaded, isAuthenticated:', this.auth.isAuthenticated);
-    } else {
-        console.log('🔍 NO TOKEN FOUND!');
-    }
-    }
-
-    getAuthHeaders() {
-        return this.auth.token ? {
-            'Authorization': `Bearer ${this.auth.token}`,
-            'Content-Type': 'application/json'
-        } : {
-            'Content-Type': 'application/json'
-        };
-    }
-
-    async checkWordPressAuth() {
-        // Skip WordPress auth if we already have a token
-        if (this.auth.isAuthenticated && this.auth.token) {
-            console.log('Skipping WordPress auth - token already loaded');
-            return true;
-        }
-
-        try {
-            // Versuche Token von WordPress zu holen
-            const response = await fetch('/wp-admin/admin-ajax.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'action=luvex_uvstrip_get_token'
-            });
+        /**
+         * Load authentication token with proper async handling
+         */
+        async loadAuthToken() {
+            console.log('🔍 loadAuthToken() started');
             
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success && data.token) {
-                    sessionStorage.setItem('luvex_uvstrip_auth_token', data.token);
-                    this.auth.token = data.token;
-                    this.auth.user = data.user;
-                    this.auth.isAuthenticated = true;
-                    console.log('WordPress auth successful:', data.user);
-                    return true;
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const tokenFromUrl = urlParams.get('token');
+                console.log('🔍 Token from URL:', tokenFromUrl ? 'Present' : 'None');
+                
+                const tokenFromStorage = sessionStorage.getItem('luvex_uvstrip_auth_token');
+                console.log('🔍 Token from storage:', tokenFromStorage ? 'Present' : 'None');
+                
+                const token = tokenFromUrl || tokenFromStorage;
+                
+                if (tokenFromUrl) {
+                    sessionStorage.setItem('luvex_uvstrip_auth_token', tokenFromUrl);
+                    // Clean URL without losing functionality
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    console.log('🔍 Token loaded from URL and stored');
                 }
+                
+                if (token && await this.validateToken(token)) {
+                    this.auth.token = token;
+                    this.auth.isAuthenticated = true;
+                    console.log('🔍 Valid auth token loaded, isAuthenticated:', true);
+                    return true;
+                } else {
+                    console.log('🔍 No valid token found');
+                    return false;
+                }
+            } catch (error) {
+                console.error('🔍 Error loading auth token:', error);
+                return false;
             }
-       } catch (error) {
-            console.log('WordPress auth not available:', error.message);
-            
-            // NEU: Redirect wenn kein Auth verfügbar
-            //this.redirectToWebsite();
-            console.log("DEBUG: Auth check failed, but redirect disabled");
-            return true; // TEMPORÄR: Tue so als ob Auth funktioniert
         }
 
-        // Fallback: Wenn Token-Response nicht ok war
-        console.log("DEBUG: No valid token received, but redirect disabled");
-        return true; // TEMPORÄR: Tue so als ob Auth funktioniert
-    }
+            /**
+                 * Validate token format and expiration
+                 */
+                async validateToken(token) {
+                    if (!token) return false;
+                    
+                    try {
+                        // Basic JWT format check
+                        const parts = token.split('.');
+                        if (parts.length !== 3) return false;
+                        
+                        // Decode payload to check expiration
+                        const payload = JSON.parse(atob(parts[1]));
+                        const now = Math.floor(Date.now() / 1000);
+                        
+                        if (payload.exp && payload.exp < now) {
+                            console.log('🔍 Token expired');
+                            sessionStorage.removeItem('luvex_uvstrip_auth_token');
+                            return false;
+                        }
+                        
+                        console.log('🔍 Token validation successful');
+                        return true;
+                    } catch (error) {
+                        console.error('🔍 Token validation failed:', error);
+                        return false;
+                    }
+                }
+
+                /**
+                 * Check if we're on a WordPress domain that supports auth
+                 */
+                isWordPressDomain() {
+                    const hostname = window.location.hostname;
+                    const wordPressDomains = ['www.luvex.tech', 'luvex.tech'];
+                    return wordPressDomains.includes(hostname);
+                }
+
+        getAuthHeaders() {
+            return this.auth.token ? {
+                'Authorization': `Bearer ${this.auth.token}`,
+                'Content-Type': 'application/json'
+            } : {
+                'Content-Type': 'application/json'
+            };
+        }
+
+        async checkWordPressAuth() {
+            // Early exit if not on WordPress domain
+            if (!this.isWordPressDomain()) {
+                console.log('Not on WordPress domain, skipping WordPress auth');
+                return false;
+            }
+
+            try {
+                const response = await fetch('/wp-admin/admin-ajax.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    credentials: 'same-origin',
+                    body: 'action=luvex_uvstrip_get_token'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data?.token) {
+                        sessionStorage.setItem('luvex_uvstrip_auth_token', data.data.token);
+                        this.auth.token = data.data.token;
+                        this.auth.user = data.data.user;
+                        this.auth.isAuthenticated = true;
+                        console.log('WordPress auth successful:', data.data.user);
+                        return true;
+                    }
+                }
+        } catch (error) {
+                console.log('WordPress auth not available:', error.message);
+            }
+
+            return false;
+        }
 
     redirectToWebsite() {
     console.log("REDIRECT DISABLED FOR DEBUGGING");
