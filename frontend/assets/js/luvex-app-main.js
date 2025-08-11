@@ -155,7 +155,9 @@ class UVStripAnalyzer {
     }
 
     get(id) {
-        return this.domCache.get(id);
+    const el = this.domCache.get(id);
+    console.log('🔍 get() called for:', id, 'found:', !!el); // DEBUG
+    return el;
     }
 
     //=========================================================================
@@ -310,8 +312,15 @@ class UVStripAnalyzer {
     }
 
     updateText(id, text) {
-        const el = this.get(id);
-        if (el) el.textContent = text;
+    console.log('📝 updateText called:', id, text); // DEBUG
+    const el = this.get(id);
+    console.log('📝 Element found:', !!el); // DEBUG
+    if (el) {
+        el.textContent = text;
+        console.log('📝 Text updated successfully'); // DEBUG
+    } else {
+        console.error('📝 Element not found:', id); // DEBUG
+    }
     }
 
     resetAnalysis() {
