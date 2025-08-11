@@ -814,6 +814,12 @@ class UVStripAnalyzer {
     }
 
     async checkWordPressAuth() {
+        // Skip WordPress auth if we already have a token
+        if (this.auth.isAuthenticated && this.auth.token) {
+            console.log('Skipping WordPress auth - token already loaded');
+            return true;
+        }
+
         try {
             // Versuche Token von WordPress zu holen
             const response = await fetch('/wp-admin/admin-ajax.php', {
