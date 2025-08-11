@@ -857,6 +857,7 @@ class UVStripAnalyzer {
                     this.auth.token = token;
                     this.auth.isAuthenticated = true;
                     console.log('🔍 Valid auth token loaded, isAuthenticated:', true);
+                    this.updateUserDisplay();
                     return true;
                 } else {
                     console.log('🔍 No valid token found');
@@ -982,7 +983,27 @@ redirectToWebsite() {
     // window.location.href = 'https://www.luvex.tech/login/?redirect=analyzer';
 }
     
+// User Display Functions
+updateUserDisplay() {
+    if (this.auth.user) {
+        const firstName = this.auth.user.first_name || this.auth.user.name?.split(' ')[0] || 'User';
+        const initials = this.getUserInitials(this.auth.user);
+        this.updateText('userName', firstName);
+        this.updateText('userAvatar', initials);
+        this.updateText('dropdownAvatar', initials);
+        this.updateText('dropdownUserName', this.auth.user.name || firstName);
+        this.updateText('dropdownUserEmail', this.auth.user.email || 'user@luvex.tech');
+    }
+}
 
+getUserInitials(user) {
+    if (user.first_name && user.last_name) return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
+    return user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?';
+}
+
+// Global functions for dropdown
+toggleUserDropdown() { this.get('userDropdown')?.classList.toggle('visible'); }
+logout() { sessionStorage.removeItem('luvex_uvstrip_auth_token'); window.location.href = 'https://www.luvex.tech/login/'; }
 
 
 } // <-- Das schließt die UVStripAnalyzer Klasse

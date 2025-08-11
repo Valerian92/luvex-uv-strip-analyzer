@@ -20,7 +20,7 @@
 <body>
     <!-- Header with LUVEX Branding -->
     <header class="header">
-        <div class="header-content">
+            <div class="header-content">
             <div class="logo-section">
                 <img src="assets/images/luvex-logo-transparency.png" alt="LUVEX Logo" class="luvex-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                 <div class="luvex-logo" style="display: none; font-size: 2rem; font-weight: bold; color: var(--luvex-bright-cyan);">LUVEX</div>
@@ -29,9 +29,41 @@
                 <h1 class="brand-title">UV Strip Analyzer</h1>
                 <p class="brand-subtitle">Professional UV Dosimetry</p>
             </div>
-            <div class="status-indicators">
-                <div class="status-dot"></div>
-                <span class="status-text">System Ready</span>
+            <div class="user-section">
+                <div class="user-info" onclick="toggleUserDropdown()">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <div class="user-details">
+                        <p class="user-welcome">Willkommen</p>
+                        <p class="user-name" id="userName">Gast</p>
+                    </div>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="dropdown-header">
+                        <div class="dropdown-user-info">
+                            <div class="dropdown-avatar" id="dropdownAvatar">?</div>
+                            <div class="dropdown-user-details">
+                                <h4 id="dropdownUserName">Gast</h4>
+                                <p id="dropdownUserEmail">user@luvex.tech</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item" onclick="openModal(document.getElementById('measurementsModal'))">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            Meine Messungen
+                        </button>
+                        <button class="dropdown-item" onclick="openModal(document.getElementById('settingsModal'))">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            Einstellungen
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item danger" onclick="logout()">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                            Abmelden
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -107,37 +139,14 @@
         </main>
 
         <!-- Sidebar for controls and info -->
+        <!-- Sidebar - SIMPLIFIED -->
         <aside class="right-column">
-            <section class="card" aria-labelledby="dashboard-title">
-                <h3 id="dashboard-title" class="card__title">Dashboard</h3>
-                <div class="dashboard-panel">
-                    <div class="panel-header">Aktuelle Messung</div>
-                    <div class="metric-item"><span class="metric-label">Modus:</span><span class="metric-value" id="currentMode">Referenz im Bild</span></div>
-                    <div class="metric-item"><span class="metric-label">Verarbeitungszeit:</span><span class="metric-value" id="processingTime">--</span></div>
-                    <div class="metric-item"><span class="metric-label">Konfidenz:</span><span class="metric-value" id="confidenceLevel">--</span></div>
-                </div>
-                <div class="dashboard-panel">
-                    <div class="panel-header">System Status</div>
-                    <div class="metric-item"><span class="metric-label">Backend:</span><span class="metric-value" style="color: #10b981;" id="backendStatus">Online</span></div>
-                    <div class="metric-item"><span class="metric-label">Letzte Analyse:</span><span class="metric-value" id="lastAnalysis">Nie</span></div>
-                </div>
-            </section>
-
             <section class="card" aria-labelledby="ref-library-title">
                 <h3 id="ref-library-title" class="card__title">Referenzbibliothek</h3>
                 <div id="referenceList" class="dashboard-panel"></div>
                 <div class="quick-actions">
                     <button id="addReferenceBtn" class="btn luvex-cta-secondary">Referenz hinzufügen</button>
                     <button id="manageLibraryBtn" class="btn luvex-cta-secondary" disabled>Bibliothek verwalten</button>
-                </div>
-            </section>
-
-            <section class="card" aria-labelledby="actions-title">
-                <h3 id="actions-title" class="card__title">Aktionen</h3>
-                <div class="quick-actions">
-                    <button id="showAllMeasurementsBtn" class="btn luvex-cta-secondary">Alle Messungen</button>
-                    <button class="btn luvex-cta-secondary">Report exportieren</button>
-                    <button id="settingsBtn" class="btn luvex-cta-secondary">Einstellungen</button>
                 </div>
             </section>
         </aside>
@@ -231,5 +240,14 @@
 
     <!-- The defer attribute ensures the HTML is parsed before the script is executed -->
     <script src="assets/js/luvex-app-main.js" defer></script>
+    <script>
+    function toggleUserDropdown() { window.uvAnalyzer?.toggleUserDropdown(); }
+    function logout() { window.uvAnalyzer?.logout(); }
+    function openModal(modal) { window.uvAnalyzer?.openModal(modal); }
+    document.addEventListener('click', e => { 
+        if (!e.target.closest('.user-section')) 
+            document.getElementById('userDropdown')?.classList.remove('visible'); 
+    });
+    </script>
 </body>
 </html>
