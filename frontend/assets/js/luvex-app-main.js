@@ -61,8 +61,8 @@ class UVStripAnalyzer {
             this.cacheDOMElements();
             this.initializeEventListeners();
             this.loadAppState();
-            await this.checkWordPressAuth();
             this.loadAuthToken();
+            await this.checkWordPressAuth();
             await this.checkBackendHealth();
             this.populateReferences(); // WIEDERHERGESTELLT
             this.showAllMeasurements(); // NEU: Lädt Messungen aus der DB beim Start
