@@ -238,17 +238,15 @@
         </div>
     </div>
 
-    <!-- The defer attribute ensures the HTML is parsed before the script is executed -->
-    
-    <script>
-    function toggleUserDropdown() { window.uvAnalyzer?.toggleUserDropdown(); }
-    function logout() { window.uvAnalyzer?.logout(); }
-    function openModal(modal) { window.uvAnalyzer?.openModal(modal); }
-    document.addEventListener('click', e => { 
-        if (!e.target.closest('.user-section')) 
-            document.getElementById('userDropdown')?.classList.remove('visible'); 
-    });
-    </script>
-    <script src="assets/js/luvex-app-main.js" defer></script>
+        <script>
+        function toggleUserDropdown() { window.uvAnalyzer?.toggleUserDropdown(); }
+        function logout() { window.uvAnalyzer?.logout(); }
+        function openModal(modal) { window.uvAnalyzer?.openModal(modal); }
+        document.addEventListener('click', e => { 
+            if (!e.target.closest('.user-section')) 
+                document.getElementById('userDropdown')?.classList.remove('visible'); 
+        });
+        </script>
+        <script src="assets/js/luvex-app-main.js"></script> <!-- defer entfernt -->
 </body>
 </html>
