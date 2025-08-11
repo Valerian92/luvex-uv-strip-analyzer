@@ -893,11 +893,58 @@ async initializeAuthentication() {
                 /**
                  * Check if we're on a WordPress domain that supports auth
                  */
-                isWordPressDomain() {
-                    const hostname = window.location.hostname;
-                    const wordPressDomains = ['www.luvex.tech', 'luvex.tech'];
-                    return wordPressDomains.includes(hostname);
+                /**
+ * Check if we're on a WordPress domain that supports auth
+ */
+        isWordPressDomain() {
+            const hostname = window.location.hostname;
+            const wordPressDomains = [
+                'www.luvex.tech', 
+                'luvex.tech',
+                'analyzer.luvex.tech'  // ← HINZUGEFÜGT!
+            ];
+            console.log('🔐 Domain check:', hostname, 'is WordPress domain:', wordPressDomains.includes(hostname));
+            return wordPressDomains.includes(hostname);
+        }
+
+        /**
+         * Alternative: Cross-domain WordPress auth check
+         */
+        async checkWordPressAuth() {
+            console.log('🔐 checkWordPressAuth() called');
+            
+            // Für analyzer.luvex.tech: Direkt zur Haupt-WordPress-Site
+            const wpDomain = 'https://www.luvex.tech';
+            
+            try {
+                console.log(`🔐 Trying WordPress auth on: ${wpDomain}`);
+                
+                const response = await fetch(`${wpDomain}/wp-admin/admin-ajax.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    credentials: 'include',  // ← Wichtig für Cross-Domain Cookies
+                    body: 'action=luvex_uvstrip_get_token'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data?.token) {
+                        sessionStorage.setItem('luvex_uvstrip_auth_token', data.data.token);
+                        this.auth.token = data.data.token;
+                        this.auth.user = data.data.user;
+                        this.auth.isAuthenticated = true;
+                        console.log('✅ WordPress auth successful:', data.data.user);
+                        return true;
+                    }
                 }
+            } catch (error) {
+                console.log(`❌ WordPress auth failed:`, error.message);
+            }
+            
+            console.log('🔐 WordPress auth not available');
+            return false;
+        }
+        
 
         getAuthHeaders() {
             return this.auth.token ? {
