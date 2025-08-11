@@ -515,8 +515,7 @@ class UVStripAnalyzer {
         this.updateText('confidenceLevel', result.confidence || '--');
     }
 
-   async checkBackendHealth(retries = 3, delay = 500) {
-    // Dashboard entfernt - Health Check vereinfacht
+ async checkBackendHealth(retries = 3, delay = 500) {
     for (let i = 0; i < retries; i++) {
         try {
             const response = await fetch(`${this.apiUrl}/health`);
@@ -531,7 +530,7 @@ class UVStripAnalyzer {
     }
     console.error('❌ Backend Offline');
     this.showStatus('Backend nicht erreichbar.', 'error');
-    }
+}
 
     //=========================================================================
     // Data Persistence (NEU: API-basiert)
@@ -830,7 +829,7 @@ class UVStripAnalyzer {
         /**
          * Load authentication token with proper async handling
          */
-        async loadAuthToken() {
+      async loadAuthToken() {
             console.log('🔍 loadAuthToken() started');
             
             try {
@@ -845,9 +844,12 @@ class UVStripAnalyzer {
                 
                 if (tokenFromUrl) {
                     sessionStorage.setItem('luvex_uvstrip_auth_token', tokenFromUrl);
-                    // Clean URL without losing functionality
                     window.history.replaceState({}, document.title, window.location.pathname);
                     console.log('🔍 Token loaded from URL and stored');
+                } else {
+                    // Clear old user display if no token
+                    this.updateText('userName', 'Gast');
+                    this.updateText('userAvatar', '?');
                 }
                 
                 if (token && await this.validateToken(token)) {

@@ -111,14 +111,14 @@ body {
 }
 
 .header-content {
-    display: grid; 
-    grid-template-columns: auto 1fr auto; 
+    display: flex; /* Ändere von grid zu flex */
+    justify-content: space-between;
     align-items: center;
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
-    gap: 3rem; /* Erhöht von 2rem */
 }
+
 
 .logo-section {
     display: flex;
@@ -1250,7 +1250,7 @@ input[type="file"] {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-left: auto; /* HINZUFÜGEN - schiebt es ganz nach rechts */
+    /* margin-left: auto; entfernen - wird durch justify-content: space-between ersetzt */
 }
 .user-info { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem 0.75rem; border-radius: var(--radius-md); transition: var(--transition-normal); user-select: none; }
 .user-info:hover { background: rgba(109, 213, 237, 0.1); }
