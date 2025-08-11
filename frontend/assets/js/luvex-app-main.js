@@ -83,19 +83,22 @@ async initializeAuthentication() {
     console.log('🔐 Current hostname:', window.location.hostname);
     console.log('🔐 Current URL:', window.location.href);
     
-    // REDIRECT TRACKING - alle Redirects loggen
-    const originalAssign = window.location.assign;
-    const originalReplace = window.location.replace;
-    window.location.assign = function(url) {
-        console.log('🚨 REDIRECT ASSIGN:', url);
-        console.trace('Redirect source');
-        return originalAssign.call(this, url);
+    // FETCH TRACKING - alle HTTP Requests loggen
+    const originalFetch = window.fetch;
+    window.fetch = function(url, options) {
+        console.log('🌐 FETCH REQUEST:', url, options);
+        return originalFetch(url, options).then(response => {
+            console.log('🌐 FETCH RESPONSE:', url, 'Status:', response.status);
+            if (response.status >= 300 && response.status < 400) {
+                console.log('🚨 REDIRECT RESPONSE:', response.headers.get('Location'));
+            }
+            return response;
+        }).catch(error => {
+            console.log('🌐 FETCH ERROR:', url, error);
+            throw error;
+        });
     };
-    window.location.replace = function(url) {
-        console.log('🚨 REDIRECT REPLACE:', url);
-        console.trace('Redirect source');
-        return originalReplace.call(this, url);
-    };
+    
     // Step 1: Load token from URL or storage
     await this.loadAuthToken();
     
@@ -109,6 +112,7 @@ async initializeAuthentication() {
         console.log('🔐 Not on WordPress domain, continuing without auth');
     }
     
+    console.log('🔐 Final auth state:', this.auth);
     return this.auth.isAuthenticated;
 }
 
@@ -905,11 +909,16 @@ async initializeAuthentication() {
         }
 
         async checkWordPressAuth() {
-            // Early exit if not on WordPress domain
+            console.log('🔐 checkWordPressAuth() called');
+            console.log('🔐 isWordPressDomain():', this.isWordPressDomain());
+    
+    // Early exit if not on WordPress domain
             if (!this.isWordPressDomain()) {
                 console.log('Not on WordPress domain, skipping WordPress auth');
                 return false;
             }
+
+            console.log('🔐 Making WordPress auth request...');
 
             try {
                 const response = await fetch('/wp-admin/admin-ajax.php', {
