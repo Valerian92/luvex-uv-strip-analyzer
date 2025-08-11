@@ -890,35 +890,38 @@ class UVStripAnalyzer {
                     }
                 }
 
-/**
- * Check if we're on a WordPress domain that supports auth
- */
-isWordPressDomain() {
-    const hostname = window.location.hostname;
-    const wordPressDomains = [
-        'www.luvex.tech', 
-        'luvex.tech',
-        'analyzer.luvex.tech'  // ← HINZUGEFÜGT!
-    ];
-    console.log('🔐 Domain check:', hostname, 'is WordPress domain:', wordPressDomains.includes(hostname));
-    return wordPressDomains.includes(hostname);
-}
+    /**
+     * Check if we're on a WordPress domain that supports auth
+     */
+    isWordPressDomain() {
+        const hostname = window.location.hostname;
+        const wordPressDomains = [
+            'www.luvex.tech', 
+            'luvex.tech'
+            // ENTFERNT: 'analyzer.luvex.tech' - das ist keine WordPress Domain!
+        ];
+        console.log('🔐 Domain check:', hostname, 'is WordPress domain:', wordPressDomains.includes(hostname));
+        return wordPressDomains.includes(hostname);
+    }
 
 /**
  * WordPress auth check - SINGLE VERSION
  */
     async checkWordPressAuth() {
-        console.log('🔐 checkWordPressAuth() called');
-        console.log('🔐 isWordPressDomain():', this.isWordPressDomain());
-        
-        // Early exit if not on WordPress domain
-        if (!this.isWordPressDomain()) {
-            console.log('Not on WordPress domain, skipping WordPress auth');
-            return false;
-        }
+    console.log('🔐 checkWordPressAuth() called');
+    console.log('🔐 isWordPressDomain():', this.isWordPressDomain());
+    
+    // Early exit if not on WordPress domain
+    if (!this.isWordPressDomain()) {
+        console.log('Not on WordPress domain, skipping WordPress auth');
+        return false;
+    }
 
-        console.log('🔐 Making WordPress auth request...');
-        try {
+    // DEFINE wpDomain based on current setup
+    const wpDomain = 'https://www.luvex.tech';  // ← HINZUGEFÜGT!
+    
+    console.log('🔐 Making WordPress auth request...');
+    try {
         console.log(`🔐 Trying WordPress auth on: ${wpDomain}`);
         
         const response = await fetch(`${wpDomain}/wp-admin/admin-ajax.php`, {
