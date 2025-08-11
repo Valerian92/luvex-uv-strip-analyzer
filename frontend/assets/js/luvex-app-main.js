@@ -78,43 +78,43 @@ class UVStripAnalyzer {
 /**
  * Professional authentication initialization with proper async flow
  */
-async initializeAuthentication() {
-    console.log('🔐 Starting authentication flow...');
-    console.log('🔐 Current hostname:', window.location.hostname);
-    console.log('🔐 Current URL:', window.location.href);
-    
-    // FETCH TRACKING - alle HTTP Requests loggen
-    const originalFetch = window.fetch;
-    window.fetch = function(url, options) {
-        console.log('🌐 FETCH REQUEST:', url, options);
-        return originalFetch(url, options).then(response => {
-            console.log('🌐 FETCH RESPONSE:', url, 'Status:', response.status);
-            if (response.status >= 300 && response.status < 400) {
-                console.log('🚨 REDIRECT RESPONSE:', response.headers.get('Location'));
-            }
-            return response;
-        }).catch(error => {
-            console.log('🌐 FETCH ERROR:', url, error);
-            throw error;
-        });
-    };
-    
-    // Step 1: Load token from URL or storage
-    await this.loadAuthToken();
-    
-    // Step 2: Only check WordPress if no valid token and on WordPress domain
-    if (!this.auth.isAuthenticated && this.isWordPressDomain()) {
-        console.log('🔐 No local token found, checking WordPress auth...');
-        await this.checkWordPressAuth();
-    } else if (this.auth.isAuthenticated) {
-        console.log('🔐 Authentication successful - token loaded');
-    } else {
-        console.log('🔐 Not on WordPress domain, continuing without auth');
+    async initializeAuthentication() {
+        console.log('🔐 Starting authentication flow...');
+        console.log('🔐 Current hostname:', window.location.hostname);
+        console.log('🔐 Current URL:', window.location.href);
+        
+        // FETCH TRACKING - alle HTTP Requests loggen
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options) {
+            console.log('🌐 FETCH REQUEST:', url, options);
+            return originalFetch(url, options).then(response => {
+                console.log('🌐 FETCH RESPONSE:', url, 'Status:', response.status);
+                if (response.status >= 300 && response.status < 400) {
+                    console.log('🚨 REDIRECT RESPONSE:', response.headers.get('Location'));
+                }
+                return response;
+            }).catch(error => {
+                console.log('🌐 FETCH ERROR:', url, error);
+                throw error;
+            });
+        };
+        
+        // Step 1: Load token from URL or storage
+        await this.loadAuthToken();
+        
+        // Step 2: Only check WordPress if no valid token and on WordPress domain
+        if (!this.auth.isAuthenticated && this.isWordPressDomain()) {
+            console.log('🔐 No local token found, checking WordPress auth...');
+            await this.checkWordPressAuth();
+        } else if (this.auth.isAuthenticated) {
+            console.log('🔐 Authentication successful - token loaded');
+        } else {
+            console.log('🔐 Not on WordPress domain, continuing without auth');
+        }
+        
+        console.log('🔐 Final auth state:', this.auth);
+        return this.auth.isAuthenticated;
     }
-    
-    console.log('🔐 Final auth state:', this.auth);
-    return this.auth.isAuthenticated;
-}
 
     //=========================================================================
     // DOM Caching and Access
@@ -907,20 +907,18 @@ isWordPressDomain() {
 /**
  * WordPress auth check - SINGLE VERSION
  */
-async checkWordPressAuth() {
-    console.log('🔐 checkWordPressAuth() called');
-    console.log('🔐 isWordPressDomain():', this.isWordPressDomain());
+    async checkWordPressAuth() {
+        console.log('🔐 checkWordPressAuth() called');
+        console.log('🔐 isWordPressDomain():', this.isWordPressDomain());
+        
+        // Early exit if not on WordPress domain
+        if (!this.isWordPressDomain()) {
+            console.log('Not on WordPress domain, skipping WordPress auth');
+            return false;
+        }
 
-    // Early exit if not on WordPress domain
-    if (!this.isWordPressDomain()) {
-        console.log('Not on WordPress domain, skipping WordPress auth');
-        return false;
-    }
-    
-    // Für analyzer.luvex.tech: Direkt zur Haupt-WordPress-Site
-    const wpDomain = 'https://www.luvex.tech';
-    
-    try {
+        console.log('🔐 Making WordPress auth request...');
+        try {
         console.log(`🔐 Trying WordPress auth on: ${wpDomain}`);
         
         const response = await fetch(`${wpDomain}/wp-admin/admin-ajax.php`, {
