@@ -80,7 +80,22 @@ class UVStripAnalyzer {
  */
 async initializeAuthentication() {
     console.log('🔐 Starting authentication flow...');
+    console.log('🔐 Current hostname:', window.location.hostname);
+    console.log('🔐 Current URL:', window.location.href);
     
+    // REDIRECT TRACKING - alle Redirects loggen
+    const originalAssign = window.location.assign;
+    const originalReplace = window.location.replace;
+    window.location.assign = function(url) {
+        console.log('🚨 REDIRECT ASSIGN:', url);
+        console.trace('Redirect source');
+        return originalAssign.call(this, url);
+    };
+    window.location.replace = function(url) {
+        console.log('🚨 REDIRECT REPLACE:', url);
+        console.trace('Redirect source');
+        return originalReplace.call(this, url);
+    };
     // Step 1: Load token from URL or storage
     await this.loadAuthToken();
     
