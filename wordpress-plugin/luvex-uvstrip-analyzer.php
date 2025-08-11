@@ -92,8 +92,8 @@ class LuvexUVStripAnalyzer {
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success && data.token) {
-                    sessionStorage.setItem('luvex_uvstrip_auth_token', data.token);
+                if (data.success && data.data && data.data.token) {    
+                    sessionStorage.setItem('luvex_uvstrip_auth_token', data.data.token);   
                     document.getElementById('<?php echo $container_id; ?>').innerHTML =
                         '<iframe src="<?php echo esc_js($analyzer_url); ?>" style="width:100%; height:800px; border:none;"></iframe>';
                 } else {
