@@ -112,6 +112,13 @@ class UVStripAnalyzer {
             console.log('🔐 Not on WordPress domain, continuing without auth');
         }
         
+        // NEU: LOGIN ERZWINGEN
+        if (!this.auth.isAuthenticated) {
+            console.log('🔐 No authentication found - redirecting to login');
+            window.location.href = 'https://www.luvex.tech/login/?redirect=analyzer';
+            return false;
+        }
+        
         console.log('🔐 Final auth state:', this.auth);
         return this.auth.isAuthenticated;
     }
