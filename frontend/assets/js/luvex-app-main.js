@@ -871,31 +871,41 @@ class UVStripAnalyzer {
             /**
                  * Validate token format and expiration
                  */
-                async validateToken(token) {
-                    if (!token) return false;
+               async validateToken(token) {
+                if (!token) return false;
+                
+                try {
+                    // Basic JWT format check
+                    const parts = token.split('.');
+                    if (parts.length !== 3) return false;
                     
-                    try {
-                        // Basic JWT format check
-                        const parts = token.split('.');
-                        if (parts.length !== 3) return false;
-                        
-                        // Decode payload to check expiration
-                        const payload = JSON.parse(atob(parts[1]));
-                        const now = Math.floor(Date.now() / 1000);
-                        
-                        if (payload.exp && payload.exp < now) {
-                            console.log('🔍 Token expired');
-                            sessionStorage.removeItem('luvex_uvstrip_auth_token');
-                            return false;
-                        }
-                        
-                        console.log('🔍 Token validation successful');
-                        return true;
-                    } catch (error) {
-                        console.error('🔍 Token validation failed:', error);
+                    // Decode payload to check expiration AND extract user data
+                    const payload = JSON.parse(atob(parts[1]));
+                    const now = Math.floor(Date.now() / 1000);
+                    
+                    if (payload.exp && payload.exp < now) {
+                        console.log('🔍 Token expired');
+                        sessionStorage.removeItem('luvex_uvstrip_auth_token');
                         return false;
                     }
+                    
+                    // EXTRACT USER DATA from JWT payload
+                    this.auth.user = {
+                        id: payload.user_id,
+                        username: payload.username,
+                        email: payload.email,
+                        display_name: payload.display_name,
+                        name: payload.display_name,
+                        first_name: payload.display_name?.split(' ')[0] || payload.username
+                    };
+                    
+                    console.log('🔍 Token validation successful, user data:', this.auth.user);
+                    return true;
+                } catch (error) {
+                    console.error('🔍 Token validation failed:', error);
+                    return false;
                 }
+            }
 
     /**
      * Check if we're on a WordPress domain that supports auth
