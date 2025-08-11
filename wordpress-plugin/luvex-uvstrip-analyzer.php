@@ -96,8 +96,10 @@ class LuvexUVStripAnalyzer {
                         if (parentCard) {
                             parentCard.style.cursor = 'pointer';
                             parentCard.onclick = function() {
-                                window.open('<?php echo esc_js($analyzer_url); ?>', '_blank');
-                            };
+                            const token = sessionStorage.getItem('luvex_uvstrip_auth_token');
+                            const url = '<?php echo esc_js($analyzer_url); ?>' + (token ? '?token=' + encodeURIComponent(token) : '');
+                            window.open(url, '_blank');
+                        };
                         }
                     } else {
                         document.getElementById('<?php echo $container_id; ?>').innerHTML =
