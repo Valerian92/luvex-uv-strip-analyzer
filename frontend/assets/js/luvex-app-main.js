@@ -115,7 +115,7 @@ class UVStripAnalyzer {
         // NEU: LOGIN ERZWINGEN
         if (!this.auth.isAuthenticated) {
             console.log('🔐 No authentication found - redirecting to login');
-            window.location.href = 'https://www.luvex.tech/login/?redirect=' + encodeURIComponent(window.location.href);
+            //window.location.href = 'https://www.luvex.tech/login/?redirect=' + encodeURIComponent(window.location.href);
             return false;
         }
         
